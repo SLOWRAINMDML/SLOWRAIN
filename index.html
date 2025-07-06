@@ -1,1 +1,356 @@
-home
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"조선"은 어떤 사람일까요? - ABOUT ME</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .slide {
+            width: 1280px;
+            height: 800px;
+            background-color: #f8fafc;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .header {
+            padding: 30px 40px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2563EB, #1e40af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #475569;
+            margin-top: 5px;
+        }
+        
+        .content {
+            display: flex;
+            padding: 20px 40px;
+            flex: 1;
+        }
+        
+        .left-column {
+            flex: 2;
+            padding-right: 20px;
+        }
+        
+        .right-column {
+            flex: 1;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #1e40af;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 8px;
+        }
+        
+        .content p {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.4;
+            margin: 0 0 12px 0;
+        }
+        
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-year {
+            width: 130px;
+            font-weight: 500;
+            color: #2563EB;
+        }
+        
+        .timeline-content {
+            flex: 1;
+        }
+        
+        .skill-category {
+            margin-bottom: 12px;
+        }
+        
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .skill-tag {
+            background-color: #e0e7ff;
+            color: #2563EB;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(30, 64, 175, 0.1));
+            border-left: 4px solid #2563EB;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        
+        .highlight-box p {
+            margin: 0;
+        }
+        
+        .priority-high {
+            color: #ef4444;
+            font-weight: 500;
+        }
+        
+        .priority-medium {
+            color: #f59e0b;
+            font-weight: 500;
+        }
+        
+        .priority-low {
+            color: #10b981;
+            font-weight: 500;
+        }
+        
+        .chart {
+            height: 180px;
+            margin-top: 100px;
+            background-color: #eef2ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            padding: 10px;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .chart-bar {
+            width: 40px;
+            background: linear-gradient(to top, #2563EB, #93c5fd);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+        }
+        
+        .chart-bar::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        
+        .chart-bar:nth-child(1) {
+            height: 60%;
+        }
+        
+        .chart-bar:nth-child(2) {
+            height: 30%;
+        }
+        
+        .chart-bar:nth-child(3) {
+            height: 110%;
+        }
+        
+        .icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            margin-right: 5px;
+            background-color: #2563EB;
+            -webkit-mask-size: cover;
+            mask-size: cover;
+        }
+        
+        .icon-career {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' /%3E%3C/svg%3E");
+        }
+        
+        .icon-skills {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' /%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' /%3E%3C/svg%3E");
+        }
+        
+        .icon-achievement {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' /%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' /%3E%3C/svg%3E");
+        }
+        
+        .icon-exp {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' /%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' /%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="header">
+            <div>
+                <h1 class="title">ABOUT ME</h1>
+                    <p class="subtitle">"조선"은 어떤 사람일까요? </p>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="left-column">
+                <div class="section-title">
+                    <span class="icon icon-career"></span>경력 요약
+                </div>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">2008-2009  </div>
+                        <div class="timeline-content">8/9라인 설비 엔지니어 (1년)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2009-2016</div>
+                        <div class="timeline-content">15라인 ENDFAB (7년)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2016-2017</div>
+                        <div class="timeline-content">SSIT 파견 - 열유체전달 연구실 (석사과정 진행, 1년)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2017-2018</div>
+                        <div class="timeline-content">스탭 - 소재 관리, 개조 개선, TEAM EA 업무 (1년 6개월)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2018-2020</div>
+                        <div class="timeline-content">P1D - SETUP, TTTM, 설비 주무 (1년 6개월)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2020-2021</div>
+                        <div class="timeline-content">혁신조직 - 머신러닝, AI, 공정 개선 (1년 6개월)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2021-2022</div>
+                        <div class="timeline-content">P2D - SETUP, TTTM, 설비 주무 (1년 6개월)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2022-2024</div>
+                        <div class="timeline-content">파운드리 V1 DIFF - TEL 장비 분임조 PCS 업무, DX 업무 (2년)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2024-2025</div>
+                        <div class="timeline-content"> 파운드리 DIFF 혁신 DX 파트 - 소프트웨어 개발 (1년)</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year">2025.1.16 - 현재</div>
+                        <div class="timeline-content"> A-FAB FA로 전배 : RISE 파트 PI 업무</div>
+                    </div>
+                </div>
+                
+                <div class="section-title">
+                    <span class="icon icon-exp"></span>직무 경험 요약
+                </div>
+                <p>총 <strong class="priority-high">11년</strong>간 설비 유지보수 업무를 수행하며 안정적인 설비 운영을 담당하였고, 스탭으로 <strong class="priority-medium">2년</strong>, 소프트웨어 엔지니어로 <strong class="priority-low">4년</strong>간 근무하며 기술적 역량을 강화하였습니다.</p>
+                
+                <div class="section-title">
+                    <span class="icon icon-achievement"></span>주요 성과
+                </div>
+                <div class="highlight-box">
+                    <p>설비 파라미터와 품질 데이터의 연관 분석을 통해 설비의 성능을 개선한 경험이 있으며, 딥러닝을 활용한 설비 이상점 발굴 시스템인 <strong>DARTS</strong>를 개발하였습니다.</p>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="section-title">
+                    <span class="icon icon-skills"></span>전문 역량
+                </div>
+                
+                <div class="skill-category">
+                    <p><strong>설비 관리</strong></p>
+                    <div class="skill-list">
+                        <span class="skill-tag">설비 유지보수</span>
+                        <span class="skill-tag">SETUP</span>
+                        <span class="skill-tag">TTTM</span>
+                        <span class="skill-tag">PCS</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <p><strong>기술 개발</strong></p>
+                    <div class="skill-list">
+                        <span class="skill-tag">소프트웨어 개발</span>
+                        <span class="skill-tag">머신러닝</span>
+                        <span class="skill-tag">AI</span>
+                        <span class="skill-tag">딥러닝</span>
+                        <span class="skill-tag">DX</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <p><strong>교육 및 강의</strong></p>
+                    <div class="skill-list">
+                        <span class="skill-tag">소프트웨어</span>
+                        <span class="skill-tag">부품</span>
+                        <span class="skill-tag">열역학</span>
+                        <span class="skill-tag">유체역학</span>
+                        <span class="skill-tag">시뮬레이션</span>
+                    </div>
+                </div>
+                
+                <div class="chart">
+                    <div class="chart-bar" data-label="설비 유지보수" style="height: 65%;"></div>
+                    <div class="chart-bar" data-label="스탭" style="height: 25%;"></div>
+                    <div class="chart-bar" data-label="SW 개발" style="height: 40%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
