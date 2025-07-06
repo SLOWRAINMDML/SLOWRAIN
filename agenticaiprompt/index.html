@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인터랙티브 에이전트 아키텍처 탐색기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The application is designed around a central, interactive flowchart representing the 9-step agentic process. This visual hub allows users to non-linearly explore the architecture. Clicking a step dynamically updates a detail panel, showing the specific prompt, LLM role, and state interactions for that step. This task-oriented design (exploring a specific step) is more user-friendly than a linear document scroll. Global concepts like the overall state schema and tooling are separated into their own section for clarity, reducing cognitive load and allowing users to deep-dive into foundational concepts when needed. This structure transforms the dense report into an intuitive, explorable knowledge base. -->
+    <!-- Visualization & Content Choices: The core of the application is an interactive flowchart built with HTML/CSS/JS (Goal: Organize/Change), which serves as the primary navigation. Clicking a node updates a detail view. Prompts are displayed in styled <pre><code> blocks with a copy-to-clipboard button (Goal: Inform, Interaction: Click-to-copy). State interactions are shown in simple "Input/Output" lists to clarify data flow (Goal: Relate). The main data tables from the report are presented as clean HTML tables in a dedicated "Global Concepts" section (Goal: Organize). This approach uses structured HTML and JS-driven interactivity to make the complex information digestible and accessible without requiring any charting libraries or graphics like SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .flow-arrow::after {
+            content: '↓';
+            display: block;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #9ca3af;
+            margin: 0.5rem 0;
+        }
+        .flow-node.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px #2563eb;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 smooth-scroll">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">고급 에이전틱 시스템 아키텍처 설계</h1>
+            <p class="mt-2 text-lg text-slate-600">Plan-Execute, ReAct, Reflection을 결합한 하이브리드 AI 에이전트 탐색기</p>
+        </header>
+
+        <main>
+            <section id="introduction" class="mb-12 bg-white p-6 rounded-xl shadow-sm">
+                <h2 class="text-2xl font-semibold mb-3 text-slate-800">아키텍처 개요</h2>
+                <p class="text-slate-700 leading-relaxed">
+                    이 애플리케이션은 복잡한 AI 에이전트 설계 문서를 시각적이고 상호작용이 가능한 형태로 재구성한 것입니다. 본 아키텍처는 신중한 '계획-실행(Plan-and-Execute)' 패러다임의 안정성과 '추론-행동(ReAct)' 패러다임의 유연성을 결합하고, 여기에 '성찰(Reflection)' 단계를 추가하여 고차원적인 문제 해결 능력을 갖춘 하이브리드 에이전트 모델을 제안합니다. 아래의 9단계 인지 사이클은 이러한 시스템의 작동 방식을 보여주며, 각 단계를 클릭하여 상세한 프롬프트 엔지니어링 기법과 상태 관리 로직을 탐색할 수 있습니다.
+                </p>
+            </section>
+            
+            <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+                
+                <nav class="lg:col-span-4 xl:col-span-3 mb-8 lg:mb-0">
+                    <div class="sticky top-8">
+                        <h3 class="text-xl font-semibold mb-4 text-center lg:text-left">에이전트 인지 사이클</h3>
+                        <div id="flow-diagram" class="flex flex-col items-center">
+                            <!-- Flow nodes will be injected by JS -->
+                        </div>
+                         <div class="mt-6 text-center lg:text-left">
+                            <a href="#global-concepts" class="inline-block bg-white text-blue-600 font-semibold py-2 px-4 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                                핵심 개념 보기 (상태, 도구) &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+
+                <div id="detail-panel" class="lg:col-span-8 xl:col-span-9 bg-white p-6 sm:p-8 rounded-2xl shadow-lg min-h-[600px]">
+                    <!-- Detail content will be injected by JS -->
+                </div>
+
+            </div>
+
+            <section id="global-concepts" class="mt-16 pt-8">
+                <h2 class="text-3xl font-bold text-center mb-10 text-slate-900">핵심 설계 개념</h2>
+                <div class="space-y-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-2xl font-semibold mb-3 text-slate-800">1. 상태 관리 (State Management)</h3>
+                        <p class="text-slate-700 leading-relaxed mb-6">
+                            에이전트의 모든 작업은 '상태(State)' 객체를 통해 관리됩니다. 이 중앙 집중식 상태 객체는 에이전트의 '작업 기억' 역할을 하며, 각 단계의 입력과 출력을 명시적으로 추적합니다. 이를 통해 전체 프로세스의 투명성을 높이고 디버깅을 용이하게 만듭니다. 아래는 에이전트의 전체 생명주기 동안 유지되는 상태 객체의 스키마입니다.
+                        </p>
+                        <div class="overflow-x-auto">
+                            <table id="state-schema-table" class="w-full text-sm text-left text-slate-600">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 rounded-l-lg">키 이름</th>
+                                        <th scope="col" class="px-6 py-3">데이터 타입</th>
+                                        <th scope="col" class="px-6 py-3 rounded-r-lg">설명</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- State schema rows will be injected by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-2xl font-semibold mb-3 text-slate-800">2. 에이전트 툴링 및 확장성</h3>
+                        <p class="text-slate-700 leading-relaxed">
+                           에이전트는 '도구(Tool)'를 사용하여 외부 세계와 상호작용합니다. 웹 검색, 파일 입출력, 코드 실행 등 다양한 기능을 도구로 정의하여 에이전트의 능력을 확장할 수 있습니다. 각 도구는 명확한 설명과 사용법을 가져야 LLM이 적절한 상황에 맞게 선택하고 사용할 수 있습니다. 장기적인 확장성을 위해, 이 아키텍처는 모델-컨텍스트 프로토콜(MCP)과 같은 표준화된 인터페이스를 염두에 두고 설계되어, 다양한 외부 도구 및 서비스와 쉽게 통합될 수 있습니다.
+                        </p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-2xl font-semibold mb-3 text-slate-800">3. 오류 처리 및 견고성</h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            견고한 에이전트는 실패 상황을 우아하게 처리할 수 있어야 합니다. 도구 실행 실패, LLM의 잘못된 출력 형식 등의 오류가 발생하면, 시스템은 이를 감지하고 재시도 루프를 실행하거나, 정의된 횟수 이상 실패 시 '인간 개입(Human-in-the-Loop)'을 요청하여 실행을 일시 중지합니다. 이처럼 실패를 완전한 중단이 아닌, 협력적인 디버깅 기회로 전환하여 시스템의 신뢰성과 안정성을 극대화합니다.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 py-8 border-t border-slate-200">
+            <p class="text-slate-500">Agentic AI Architecture Explorer | A Visual Interpretation</p>
+        </footer>
+    </div>
+
+<script>
+const agentData = {
+    steps: [
+        {
+            id: 1,
+            title: "사용자 질의 분석",
+            role: "쿼리 분석가",
+            pattern: "계획 및 실행",
+            description: "원시 사용자 쿼리를 받아 핵심 의도를 파악하고, AI 에이전트를 위한 명확하고 실행 가능한 목표로 재구성합니다.",
+            prompt: `System: 당신은 세심한 쿼리 분석가입니다. 당신의 역할은 원시 사용자 쿼리를 분해하고, 자율 AI 에이전트를 위한 명확하고, 실행 가능하며, 모호하지 않은 목표로 재구성하는 것입니다. 대화적인 군더더기를 제거하고, 모호함을 해결하며, 핵심 과제를 정확하게 명시하십시오.
+
+사용자 쿼리:
+{input}
+
+분석 및 재구성:
+1.  **핵심 의도 파악:** 사용자가 달성하고자 하는 근본적인 목표는 무엇입니까?
+2.  **핵심 개체 식별:** 관련된 구체적인 주제, 토픽 또는 데이터 포인트는 무엇입니까?
+3.  **모호함 해결:** 불분명한 용어가 있습니까? (예: "최신"은 "오늘 날짜, YYYY-MM-DD 기준"으로 명확히 해야 합니다).
+4.  **실행 가능한 목표 공식화:** 위의 내용을 결합하여 단일하고 명확한 지침으로 만드십시오.
+
+재구성된 목표를 다음 JSON 형식으로 출력하십시오:
+{{
+  "objective": "에이전트를 위한 명확하고 실행 가능한 목표."
+}}`,
+            stateIO: {
+                input: ["input"],
+                output: ["objective"]
+            }
+        },
+        {
+            id: 2,
+            title: "프로세스 흐름 생성",
+            role: "마스터 기획자",
+            pattern: "계획 및 실행",
+            description: "명확해진 목표를 달성하기 위한 높은 수준의 단계별 계획을 Mermaid 순서도 형식으로 설계합니다.",
+            prompt: `System: 당신은 마스터 기획자입니다. 당신의 임무는 주어진 목표를 달성하기 위한 논리적이고 단계적인 계획을 수립하는 것입니다. 계획은 개별적이고 실행 가능한 단계들의 순서여야 합니다. 마지막 단계는 항상 수집된 정보를 종합하여 사용자의 원래 목표에 답변하는 것이어야 합니다. 불필요한 단계를 추가하지 마십시오. 각 단계가 명확한 지침인지 확인하십시오.
+
+목표:
+{objective}
+
+사용 가능한 상위 수준 기능:
+- 웹 검색: 공개 정보, 뉴스, 데이터 검색용.
+- 파일 입출력: 로컬 스크래치패드에 데이터 읽기 및 쓰기용.
+- 코드 실행: 계산, 데이터 분석 또는 복잡한 로직 수행용.
+- 인간 지원: 명확화 또는 검증 요청용.
+
+목표와 사용 가능한 기능을 바탕으로 계획을 생성하십시오.
+
+계획을 \`\`\`mermaid\`\`\` 코드 블록으로 둘러싸인 Mermaid 순서도 구문으로 출력하십시오. 순서도는 간단한 상하향 그래프여야 합니다.
+
+예시:
+\`\`\`mermaid
+graph TD
+    A[1단계: 쿼리의 핵심 개체 식별] --> B[2단계: 개체 X에 대한 정보 검색]
+    B --> C[3단계: 개체 Y에 대한 정보 검색]
+    C --> D[4단계: 결과를 종합하여 목표에 답변]
+\`\`\`
+
+당신의 계획:
+\`\`\`mermaid
+graph TD
+   ... 생성된 계획...
+\`\`\``,
+            stateIO: {
+                input: ["objective"],
+                output: ["plan"]
+            }
+        },
+        {
+            id: 3,
+            title: "총 단계 수 계산",
+            role: "계획 파서 (자동)",
+            pattern: "계획 및 실행",
+            description: "프로그래밍 방식으로 Mermaid 계획을 파싱하여 실행 가능한 단계 목록과 총 단계 수를 추출합니다. (LLM 호출 없음)",
+            prompt: `// This is a programmatic step, not an LLM prompt.
+function parseMermaidPlan(mermaidString) {
+    const lines = mermaidString.split('\\n');
+    const steps = lines
+        .map(line => {
+            const match = line.match(/\\[(.*?)\\]/);
+            return match ? match[1] : null;
+        })
+        .filter(Boolean);
+    
+    return {
+        plan_steps: steps,
+        total_steps: steps.length
+    };
+}`,
+            stateIO: {
+                input: ["plan"],
+                output: ["plan_steps", "total_steps"]
+            }
+        },
+        {
+            id: 4,
+            title: "프롬프트 생성 및 실행",
+            role: "실행자",
+            pattern: "추론 및 행동 (ReAct)",
+            description: "ReAct 사이클의 핵심. 계획의 현재 단계를 수행하기 위해 '사고(Thought)'를 하고, 가장 적합한 '행동(Action)' 즉, 도구를 선택하여 실행합니다.",
+            prompt: `System: 당신은 전문 실행자 에이전트입니다. 당신의 목표는 전체 목표를 달성하기 위해 계획의 현재 단계를 실행하는 것입니다. 당신은 사고-행동-관찰 사이클로 작동합니다. 제공된 도구만을 사용해야 합니다.
+
+**전체 목표:** {objective}
+
+**전체 계획:**
+{plan_steps}
+
+**현재 실행할 단계:** {current_plan_step}
+
+**과거 행동 기록:**
+{past_steps}
+
+**사용 가능한 도구:**
+{tool_definitions}
+
+이제 현재 단계를 진행하기 위해 취해야 할 다음 행동을 결정해야 합니다. 당신의 사고 과정과 취할 행동을 나타내는 단일 JSON 객체로만 응답하십시오. 형식은 다음과 같습니다:
+{{
+  "thought": "행동을 선택한 이유. 현재 단계를 분석하고, 이전에 수행된 작업을 확인하기 위해 기록을 검토하며, 현재 단계를 완수하는 데 가장 적합한 도구를 결정합니다.",
+  "action": {{
+    "tool_name": "사용 가능한 도구 목록에서 사용할 도구의 이름.",
+    "arguments": {{
+      "arg1_name": "value1",
+      "arg2_name": "value2"
+    }}
+  }}
+}}`,
+            stateIO: {
+                input: ["objective", "plan_steps", "current_step_index", "past_steps", "available_tools"],
+                output: ["last_action", "last_observation"]
+            }
+        },
+        {
+            id: 5,
+            title: "의도 일치 확인",
+            role: "평가자",
+            pattern: "추론 및 행동 (ReAct)",
+            description: "실행된 행동의 결과(관찰)가 현재 계획 단계의 의도를 성공적으로 달성했는지 비판적으로 평가합니다.",
+            prompt: `System: 당신은 세심하고 비판적인 평가자입니다. 당신의 유일한 목적은 행동의 결과(관찰)가 특정 과제(계획 단계)의 의도를 성공적으로 충족했는지 여부를 결정하는 것입니다. 전체 목표가 아닌 현재 단계만 평가하십시오.
+
+**계획 단계:**
+{current_plan_step}
+
+**수행된 행동:**
+{last_action}
+
+**관찰 (행동의 결과):**
+{last_observation}
+
+**평가:**
+관찰을 바탕으로, 행동이 계획 단계의 목표를 성공적으로 그리고 완전히 달성했습니까?
+- 관찰이 오류이거나, 비어 있거나, 필요한 정보를 포함하지 않으면 단계는 실패한 것입니다.
+- 관찰이 계획 단계에 설명된 정보를 제공하거나 행동을 완료하면 성공한 것입니다.
+
+다음 형식의 JSON 객체로만 응답하십시오:
+{{
+  "is_sufficient": boolean,
+  "justification": "결정에 대한 간결한 한 문장 설명."
+}}`,
+            stateIO: {
+                input: ["current_plan_step", "last_action", "last_observation"],
+                output: ["is_sufficient"]
+            }
+        },
+        {
+            id: 6,
+            title: "프로세스 개선",
+            role: "재기획자 / HITL",
+            pattern: "성찰 / Human-in-the-Loop",
+            description: "이전 단계(5)가 실패로 평가될 경우 활성화됩니다. 시스템은 자율적으로 계획을 수정하거나, 인간 운영자에게 개입을 요청하여 문제를 해결합니다.",
+            prompt: `System: 에이전트가 오류를 마주했거나 단계를 완료하지 못했습니다. 인간의 검토와 지침을 위해 실행이 일시 중지되었습니다.
+
+**전체 목표:** {objective}
+
+**원본 계획:**
+{plan}
+
+**실행 기록:**
+{past_steps}
+
+**실패한 단계:**
+{failed_step}
+
+**실패 원인:**
+{failure_justification}
+
+**운영자님, 지침을 제공해 주십시오:**
+다음을 수행할 수 있습니다:
+1.  에이전트가 다음에 시도할 수정된 행동을 제공합니다.
+2.  기존 계획을 대체할 새로운, 업데이트된 계획을 제공합니다.
+3.  에이전트에게 종료를 지시합니다.
+
+당신의 입력은 실행을 재개하는 데 사용됩니다.`,
+            stateIO: {
+                input: ["objective", "plan", "past_steps", "failed_step", "failure_justification"],
+                output: ["(수정된 plan 또는 action)"]
+            }
+        },
+        {
+            id: 7,
+            title: "최종 단계 확인",
+            role: "완료 검사기",
+            pattern: "성찰",
+            description: "모든 계획 단계가 실행된 후, 전체 기록을 검토하여 최종 목표에 답변하기에 충분한 정보가 수집되었는지 종합적으로 확인합니다.",
+            prompt: `System: 당신은 완료 검사기입니다. 모든 계획된 단계가 실행되었습니다. 당신의 임무는 전체 실행 기록을 검토하고 최종 목표에 포괄적으로 답변하는 데 필요한 모든 정보가 수집되었는지 확인하는 것입니다.
+
+**최종 목표:**
+{objective}
+
+**원본 계획:**
+{plan}
+
+**전체 실행 기록 (행동 및 관찰):**
+{past_steps}
+
+**분석:**
+기록을 검토하십시오. 목표에 필요한 모든 정보가 관찰에 포함되어 있습니까? 누락된 컨텍스트가 있습니까?
+
+다음 형식의 JSON 객체로만 응답하십시오:
+{{
+  "is_complete": boolean,
+  "summary_of_findings": "실행 기록에서 수집된 모든 핵심 정보를 간결하게 요약합니다. 이것이 최종 답변의 컨텍스트가 될 것입니다.",
+  "justification": "정보가 완전하거나 불완전한 이유에 대한 간략한 설명."
+}}`,
+            stateIO: {
+                input: ["objective", "plan", "past_steps"],
+                output: ["is_complete", "summary_of_findings"]
+            }
+        },
+        {
+            id: 8,
+            title: "내용 편집 및 개선",
+            role: "최종 종합가",
+            pattern: "성찰",
+            description: "검증된 결과 요약을 바탕으로 사용자의 원래 목표에 대한 최종적이고, 잘 다듬어진, 일관성 있는 응답을 작성합니다.",
+            prompt: `System: 당신은 전문 작가이자 종합가입니다. 당신의 임무는 제공된 결과 요약만을 사용하여 사용자의 목표에 대한 최종적이고, 포괄적이며, 잘 구조화된 응답을 생성하는 것입니다. 새로운 정보를 만들어내지 마십시오.
+
+**사용자 목표:**
+{objective}
+
+**검증된 결과 요약:**
+{summary_of_findings}
+
+**과제:**
+사용자의 목표를 직접적으로 다루는 명확하고, 일관성 있으며, 완전한 응답을 작성하십시오. 응답을 논리적으로 구조화하십시오. 목표가 질문이었다면 답변하고, 과제였다면 결과를 제시하십시오.
+
+최종 응답:`,
+            stateIO: {
+                input: ["objective", "summary_of_findings"],
+                output: ["final_response"]
+            }
+        },
+        {
+            id: 9,
+            title: "최종 출력",
+            role: "출력 (자동)",
+            pattern: "-",
+            description: "에이전트의 인지 사이클이 성공적으로 완료되고, 최종 생성된 응답이 사용자에게 제시됩니다.",
+            prompt: `// This is a terminal step.
+// The runtime presents the 'final_response' from the state to the user.`,
+            stateIO: {
+                input: ["final_response"],
+                output: ["-"]
+            }
+        },
+    ],
+    stateSchema: [
+        { key: 'input', type: 'str', desc: '사용자의 원시 입력 쿼리.' },
+        { key: 'objective', type: 'str', desc: '분석되고 명확해진 에이전트의 목표.' },
+        { key: 'plan', type: 'str', desc: 'Mermaid 형식의 고수준 실행 계획.' },
+        { key: 'plan_steps', type: 'List[str]', desc: '파싱된 개별 계획 단계 목록.' },
+        { key: 'total_steps', type: 'int', desc: '계획의 총 단계 수.' },
+        { key: 'current_step_index', type: 'int', desc: '현재 실행 중인 계획 단계의 인덱스.' },
+        { key: 'past_steps', type: 'List[(action, obs)]', desc: '(행동, 관찰) 튜플의 실행 기록.' },
+        { key: 'last_action', type: 'str', desc: '가장 최근에 수행된 행동의 설명.' },
+        { key: 'last_observation', type: 'str', desc: '가장 최근 행동의 결과.' },
+        { key: 'is_sufficient', type: 'bool', desc: '현재 단계가 성공적으로 완료되었는지 여부.' },
+        { key: 'is_complete', type: 'bool', desc: '전체 계획이 완료되었는지 여부.' },
+        { key: 'summary_of_findings', type: 'str', desc: '최종 응답 생성을 위한 정보 요약.' },
+        { key: 'final_response', type: 'str', desc: '사용자에게 제시될 최종 결과물.' },
+        { key: 'retry_count', type: 'int', desc: '특정 단계의 재시도 횟수.' },
+    ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const flowDiagram = document.getElementById('flow-diagram');
+    const detailPanel = document.getElementById('detail-panel');
+    const stateSchemaTableBody = document.querySelector('#state-schema-table tbody');
+    let activeStep = 1;
+
+    function renderFlowDiagram() {
+        flowDiagram.innerHTML = '';
+        agentData.steps.forEach((step, index) => {
+            const node = document.createElement('a');
+            node.href = `#detail-panel`;
+            node.className = `flow-node w-full text-center p-3 my-1 rounded-lg border-2 border-slate-200 bg-white cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-blue-50 ${step.id === activeStep ? 'active border-blue-600 bg-blue-50' : ''}`;
+            node.dataset.stepId = step.id;
+            node.innerHTML = `<span class="font-semibold text-slate-700">${step.id}. ${step.title}</span>`;
+            flowDiagram.appendChild(node);
+            
+            if (index < agentData.steps.length - 1) {
+                const arrow = document.createElement('div');
+                arrow.className = 'flow-arrow';
+                flowDiagram.appendChild(arrow);
+            }
+        });
+    }
+    
+    function renderDetail(stepId) {
+        const step = agentData.steps.find(s => s.id === stepId);
+        if (!step) return;
+
+        const stateInputHtml = step.stateIO.input.map(key => `<span class="inline-block bg-sky-100 text-sky-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">${key}</span>`).join('');
+        const stateOutputHtml = step.stateIO.output.map(key => `<span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">${key}</span>`).join('');
+
+        detailPanel.innerHTML = `
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                    <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-3 py-1 rounded-full">${step.pattern}</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold mt-2 text-slate-900">${step.id}. ${step.title}</h2>
+                    <p class="text-slate-600 mt-1"><strong>LLM 역할:</strong> ${step.role}</p>
+                </div>
+                <button id="copy-btn" class="mt-4 sm:mt-0 bg-slate-700 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1z"/>
+                    </svg>
+                    프롬프트 복사
+                </button>
+            </div>
+            <p class="text-slate-700 mb-6 pb-6 border-b border-slate-200">${step.description}</p>
+            
+            <div class="mb-6">
+                <h4 class="font-semibold text-slate-800 mb-2">프롬프트 템플릿</h4>
+                <div class="relative">
+                    <pre class="bg-slate-900 text-white p-4 rounded-lg text-sm overflow-x-auto"><code id="prompt-content">${step.prompt.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="font-semibold text-slate-800 mb-3">상태(State) 상호작용</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h5 class="font-semibold text-slate-700 mb-2">입력 (Reads from State)</h5>
+                        <div>${stateInputHtml}</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h5 class="font-semibold text-slate-700 mb-2">출력 (Writes to State)</h5>
+                        <div>${stateOutputHtml}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const copyBtn = document.getElementById('copy-btn');
+        const promptContent = document.getElementById('prompt-content');
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(promptContent.innerText).then(() => {
+                copyBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                  <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022z"/>
+                </svg>
+                복사 완료!`;
+                setTimeout(() => {
+                    copyBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1z"/>
+                    </svg>
+                    프롬프트 복사`;
+                }, 2000);
+            });
+        });
+    }
+
+    function renderStateSchema() {
+        stateSchemaTableBody.innerHTML = '';
+        agentData.stateSchema.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b';
+            row.innerHTML = `
+                <td class="px-6 py-4 font-mono font-medium text-slate-900 whitespace-nowrap">${item.key}</td>
+                <td class="px-6 py-4 font-mono text-purple-700">${item.type.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td class="px-6 py-4">${item.desc}</td>
+            `;
+            stateSchemaTableBody.appendChild(row);
+        });
+    }
+
+    flowDiagram.addEventListener('click', (e) => {
+        const node = e.target.closest('.flow-node');
+        if (node) {
+            e.preventDefault();
+            const stepId = parseInt(node.dataset.stepId);
+            activeStep = stepId;
+            renderFlowDiagram();
+            renderDetail(activeStep);
+            
+            // Scroll detail panel into view on smaller screens
+            if (window.innerWidth < 1024) {
+                 detailPanel.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    });
+
+    renderFlowDiagram();
+    renderDetail(activeStep);
+    renderStateSchema();
+});
+</script>
+
+</body>
+</html>
