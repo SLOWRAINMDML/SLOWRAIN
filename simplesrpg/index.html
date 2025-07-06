@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코드 브레이커: 심연의 미궁 - SRPG Dungeon Crawler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 1)), url('https://placehold.co/1920x1080/0a0a1a/e0e0e0?text=Dungeon+Concept');
+            background-size: cover;
+            background-position: center;
+        }
+        .section-title {
+            @apply text-3xl md:text-4xl font-bold text-white mb-2 text-center;
+        }
+        .section-subtitle {
+            @apply text-lg text-gray-400 mb-12 text-center max-w-2xl mx-auto;
+        }
+        .feature-card {
+            @apply bg-gray-800 p-6 md:p-8 rounded-xl shadow-lg hover:shadow-cyan-500/20 transform hover:-translate-y-2 transition-all duration-300 flex flex-col;
+        }
+        .class-card {
+            @apply bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-lg text-center transform hover:scale-105 hover:border-teal-400 transition-all duration-300;
+        }
+        .roadmap-item {
+            @apply flex items-start sm:items-center mb-4;
+        }
+        .roadmap-icon {
+            @apply w-8 h-8 rounded-full flex items-center justify-center mr-4 flex-shrink-0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <!-- Hero Section -->
+    <header class="hero-bg">
+        <div class="container mx-auto px-6 py-24 md:py-40 text-center text-white">
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-4">코드 브레이커: 심연의 미궁</h1>
+            <p class="text-xl md:text-2xl text-cyan-300 font-bold mb-8">절차적으로 생성되는 던전, AI가 이끄는 실시간 스토리.</p>
+            <p class="max-w-3xl mx-auto text-lg text-gray-300 mb-10">
+                당신의 모든 선택이 살아있는 세계를 만듭니다. 고전 SRPG의 깊이와 현대 AI 기술의 만남을 경험하세요.
+            </p>
+            <a href="#features" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 text-lg">
+                게임 특징 알아보기
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Features Section -->
+        <section id="features" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">게임의 핵심 특징</h2>
+                <p class="section-subtitle">고전의 향수와 혁신적인 기술이 결합된 새로운 차원의 던전 탐험을 제공합니다.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Feature 1: Procedural Dungeons -->
+                    <div class="feature-card">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-cyan-900/50 rounded-full mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-cyan-400"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">무한한 미궁 탐험</h3>
+                        </div>
+                        <img src="https://i.imgur.com/5A2zX8g.png" alt="절차적으로 생성된 던전 맵 예시" class="rounded-lg my-4 w-full shadow-lg">
+                        <p class="text-gray-400">
+                            Python으로 구현된 절차적 생성 시스템이 매번 새로운 구조의 던전을 만들어냅니다. 같은 플레이는 두 번 다시 없습니다. 방, 복도, 함정, 몬스터의 배치가 모두 실시간으로 생성됩니다.
+                        </p>
+                    </div>
+                    <!-- Feature 2: Tactical SRPG Combat -->
+                    <div class="feature-card">
+                        <div class="flex items-center mb-4">
+                           <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-cyan-900/50 rounded-full mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-cyan-400"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9.06 10.44.92-2.3 2.3-.92-2.3-.92-.92-2.3-.92 2.3-2.3.92 2.3.92.92 2.3z"></path><path d="m14.94 13.56.92-2.3 2.3-.92-2.3-.92-.92-2.3-.92 2.3-2.3.92 2.3.92.92 2.3z"></path><path d="m7 18.5.92-2.3 2.3-.92-2.3-.92-.92-2.3-.92 2.3-2.3.92 2.3.92.92 2.3z"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">전략적 턴제 전투</h3>
+                        </div>
+                        <p class="text-gray-400 mt-auto">
+                            타일 기반의 클래식 SRPG 전투를 즐기세요. 지형의 높낮이, 공격 범위, 스킬의 상성을 고려하여 최적의 수를 찾아야 합니다. 한 턴의 선택이 전투의 승패를 좌우합니다.
+                        </p>
+                    </div>
+                    <!-- Feature 3: AI Narrative Engine -->
+                    <div class="feature-card">
+                         <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-cyan-900/50 rounded-full mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-cyan-400"><path d="M15 2H9a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"></path><path d="M12 18h.01"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h2"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">살아있는 스토리텔링</h3>
+                        </div>
+                        <p class="text-gray-400 mt-auto">
+                            로컬 AI(Llama.cpp)가 당신의 플레이에 실시간으로 반응합니다. 방에 입장하거나, 보스를 물리치는 등 주요 이벤트에 따라 역동적인 설명, 대화, 그리고 힌트를 생성하여 몰입감을 극대화합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Player Classes Section -->
+        <section id="classes" class="py-20 bg-gray-900/70 hero-bg">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">네 명의 영웅, 네 가지 방식</h2>
+                <p class="section-subtitle">각기 다른 역할과 고유 스킬을 가진 클래스 중 하나를 선택하여 당신만의 스타일로 던전을 공략하세요.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Knight -->
+                    <div class="class-card">
+                        <img src="https://placehold.co/128x128/3b82f6/ffffff?text=🛡️" class="mx-auto rounded-full mb-4 border-4 border-gray-700" alt="Knight Icon">
+                        <h3 class="text-2xl font-bold text-white">나이트</h3>
+                        <p class="text-blue-300 font-semibold mb-2">최전선 탱커</p>
+                        <p class="text-gray-400">높은 방어력으로 아군을 보호합니다.</p>
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <p class="text-sm font-bold text-white">고유 스킬: <span class="text-blue-400">실드 차지</span></p>
+                            <p class="text-xs text-gray-500">2칸 돌진하며 적을 기절시킵니다.</p>
+                        </div>
+                    </div>
+                    <!-- Rogue -->
+                    <div class="class-card">
+                        <img src="https://placehold.co/128x128/a855f7/ffffff?text=🗡️" class="mx-auto rounded-full mb-4 border-4 border-gray-700" alt="Rogue Icon">
+                        <h3 class="text-2xl font-bold text-white">로그</h3>
+                        <p class="text-purple-300 font-semibold mb-2">높은 기동성</p>
+                        <p class="text-gray-400">빠르게 적의 배후를 노립니다.</p>
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <p class="text-sm font-bold text-white">고유 스킬: <span class="text-purple-400">섀도우 스트라이크</span></p>
+                            <p class="text-xs text-gray-500">배후 공격 시 치명타가 발동됩니다.</p>
+                        </div>
+                    </div>
+                    <!-- Mage -->
+                    <div class="class-card">
+                        <img src="https://placehold.co/128x128/ef4444/ffffff?text=🔥" class="mx-auto rounded-full mb-4 border-4 border-gray-700" alt="Mage Icon">
+                        <h3 class="text-2xl font-bold text-white">메이지</h3>
+                        <p class="text-red-300 font-semibold mb-2">광역 공격수</p>
+                        <p class="text-gray-400">강력한 마법으로 다수를 제압합니다.</p>
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <p class="text-sm font-bold text-white">고유 스킬: <span class="text-red-400">파이어 버스트</span></p>
+                            <p class="text-xs text-gray-500">3x3 범위에 화염 피해를 입힙니다.</p>
+                        </div>
+                    </div>
+                    <!-- Cleric -->
+                    <div class="class-card">
+                        <img src="https://placehold.co/128x128/10b981/ffffff?text=✨" class="mx-auto rounded-full mb-4 border-4 border-gray-700" alt="Cleric Icon">
+                        <h3 class="text-2xl font-bold text-white">클레릭</h3>
+                        <p class="text-emerald-300 font-semibold mb-2">치유/지원</p>
+                        <p class="text-gray-400">아군을 치유하고 강화합니다.</p>
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <p class="text-sm font-bold text-white">고유 스킬: <span class="text-emerald-400">블레싱</span></p>
+                            <p class="text-xs text-gray-500">공격력을 높이고 체력을 회복시킵니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap Section -->
+        <section id="roadmap" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6 max-w-3xl">
+                <h2 class="section-title">개발 로드맵</h2>
+                <p class="section-subtitle">프로젝트는 기획에 따라 차근차근 진행되고 있습니다. 현재까지의 성과와 다음 목표를 확인하세요.</p>
+                <div class="bg-gray-800 p-6 md:p-8 rounded-lg">
+                    <!-- Phase 1 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-green-500 text-white">✔</div>
+                        <div>
+                            <h4 class="font-bold text-white">P1: Python 생성기 안정화</h4>
+                            <p class="text-sm text-gray-400">던전 데이터 JSON 생성 검증 완료</p>
+                        </div>
+                    </div>
+                    <!-- Phase 2 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-green-500 text-white">✔</div>
+                        <div>
+                            <h4 class="font-bold text-white">P2: Godot 렌더러 구현</h4>
+                            <p class="text-sm text-gray-400">JSON 로더 및 TileMap 렌더러 구현 완료</p>
+                        </div>
+                    </div>
+                    <!-- Phase 3 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-green-500 text-white">✔</div>
+                        <div>
+                            <h4 class="font-bold text-white">P3: 핵심 시스템 완성</h4>
+                            <p class="text-sm text-gray-400">전장의 안개(Fog-of-War), 이동/공격 범위 표시 완료</p>
+                        </div>
+                    </div>
+                    <!-- Phase 4 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-green-500 text-white">✔</div>
+                        <div>
+                            <h4 class="font-bold text-white">P4: 스킬 시스템 구현</h4>
+                            <p class="text-sm text-gray-400">스킬 시스템 및 자동 타겟팅 데미지 처리 완료</p>
+                        </div>
+                    </div>
+                    <!-- Phase 5 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-green-500 text-white">✔</div>
+                        <div>
+                            <h4 class="font-bold text-white">P5: AI 연동</h4>
+                            <p class="text-sm text-gray-400">Llama.cpp 로컬 API 연동 및 다이얼로그 UI 완료</p>
+                        </div>
+                    </div>
+                    <!-- Phase 6 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-gray-600 text-gray-300">⬜</div>
+                        <div>
+                            <h4 class="font-bold text-white">P6: 메타 스토리 시스템</h4>
+                            <p class="text-sm text-gray-400">힌트 수집 및 스토리 종합 기능 개발 진행 중</p>
+                        </div>
+                    </div>
+                    <!-- Phase 7 -->
+                    <div class="roadmap-item">
+                        <div class="roadmap-icon bg-gray-600 text-gray-300">⬜</div>
+                        <div>
+                            <h4 class="font-bold text-white">P7: 폴리싱</h4>
+                            <p class="text-sm text-gray-400">애니메이션, FX, 사운드, 현지화 등 최종 다듬기 예정</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-400">
+            <p>&copy; 2025 Code Breaker Project. All rights reserved.</p>
+            <p class="text-sm mt-2">이 페이지는 제공된 기획 문서를 바탕으로 생성되었습니다.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
