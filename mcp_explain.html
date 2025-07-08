@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP 클라이언트 프로젝트 설명서</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .file-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: #f4f4f4;
+            border-left: 4px solid #007acc;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .method-signature {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #17a2b8;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            background: #e8f5e8;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        .architecture-diagram {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            border: 2px dashed #007acc;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .toc {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: decimal;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #007acc;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 MCP 클라이언트 프로젝트 설명서</h1>
+        
+        <div class="info">
+            <strong>프로젝트 개요:</strong> 이 프로젝트는 Model Context Protocol (MCP)을 사용하여 다양한 LLM과 통합된 클라이언트를 구현한 Python 프로젝트입니다. MCP를 통해 외부 도구와 서비스를 연결하고, LLM이 이러한 도구들을 활용할 수 있도록 하는 종합적인 솔루션을 제공합니다.
+        </div>
+
+        <div class="toc">
+            <h3>📚 목차</h3>
+            <ul>
+                <li><a href="#overview">프로젝트 개요</a></li>
+                <li><a href="#architecture">아키텍처</a></li>
+                <li><a href="#main-client">메인 클라이언트 (SimpleMcpClient)</a></li>
+                <li><a href="#web-ui">웹 UI 클라이언트</a></li>
+                <li><a href="#manual-client">수동 클라이언트</a></li>
+                <li><a href="#config">설정 관리</a></li>
+                <li><a href="#example-server">예제 MCP 서버</a></li>
+                <li><a href="#debug">디버깅 도구</a></li>
+                <li><a href="#usage">사용 방법</a></li>
+                <li><a href="#development">개발 가이드</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">🎯 프로젝트 개요</h2>
+        
+        <p>이 프로젝트는 <strong>Model Context Protocol (MCP)</strong>을 기반으로 한 통합 클라이언트 시스템입니다. MCP는 LLM이 외부 도구와 안전하게 상호작용할 수 있도록 하는 표준 프로토콜입니다.</p>
+
+        <ul class="feature-list">
+            <li><strong>🔗 다중 MCP 서버 연결:</strong> 여러 MCP 서버를 동시에 연결하고 관리</li>
+            <li><strong>🤖 다중 LLM 지원:</strong> OpenAI, Anthropic, Ollama 등 다양한 LLM 제공자 지원</li>
+            <li><strong>🌐 웹 UI 인터페이스:</strong> Streamlit 기반의 사용자 친화적 웹 인터페이스</li>
+            <li><strong>🔧 설정 관리:</strong> 유연하고 확장 가능한 설정 시스템</li>
+            <li><strong>🐛 디버깅 도구:</strong> MCP 통신을 분석할 수 있는 디버깅 유틸리티</li>
+            <li><strong>📝 예제 제공:</strong> 학습과 테스트를 위한 완전한 예제 MCP 서버</li>
+        </ul>
+
+        <div class="architecture-diagram">
+            <h3>🏗️ 시스템 아키텍처</h3>
+            <pre>
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Web UI        │    │  Main Client    │    │ Manual Client   │
+│  (Streamlit)    │    │ (SimpleMCP)     │    │ (Debug/Test)    │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          └──────────────────────┼──────────────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │     MCP Protocol        │
+                    │   (JSON-RPC over       │
+                    │    stdin/stdout)        │
+                    └────────────┬────────────┘
+                                 │
+          ┌──────────────────────┼──────────────────────┐
+          │                      │                      │
+    ┌─────▼─────┐          ┌─────▼─────┐          ┌─────▼─────┐
+    │ Draw MCP  │          │Godot MCP  │          │Other MCP  │
+    │  Server   │          │  Server   │          │ Servers   │
+    └───────────┘          └───────────┘          └───────────┘
+            </pre>
+        </div>
+
+        <h2 id="architecture">🏗️ 아키텍처</h2>
+
+        <table>
+            <tr>
+                <th>구성 요소</th>
+                <th>역할</th>
+                <th>구현 파일</th>
+            </tr>
+            <tr>
+                <td>메인 클라이언트</td>
+                <td>MCP 서버 관리 및 LLM 통합</td>
+                <td>python_mcp_llm_example.py</td>
+            </tr>
+            <tr>
+                <td>웹 UI</td>
+                <td>Streamlit 기반 사용자 인터페이스</td>
+                <td>client.py</td>
+            </tr>
+            <tr>
+                <td>수동 클라이언트</td>
+                <td>로우레벨 MCP 통신 및 테스트</td>
+                <td>manual_mcp_client.py</td>
+            </tr>
+            <tr>
+                <td>설정 관리자</td>
+                <td>통합 설정 시스템</td>
+                <td>config.py</td>
+            </tr>
+            <tr>
+                <td>예제 서버</td>
+                <td>테스트용 MCP 서버</td>
+                <td>example_mcp_server.py</td>
+            </tr>
+            <tr>
+                <td>디버깅 도구</td>
+                <td>MCP 통신 디버깅</td>
+                <td>debug_mcp_raw.py</td>
+            </tr>
+        </table>
+
+        <h2 id="main-client">🤖 메인 클라이언트 (SimpleMcpClient)</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: python_mcp_llm_example.py</h3>
+            
+            <p>프로젝트의 핵심인 <code>SimpleMcpClient</code> 클래스는 모든 MCP와 LLM 기능을 하나로 통합합니다.</p>
+
+            <h4>🔧 주요 클래스</h4>
+            
+            <div class="method-signature">
+                @dataclass<br>
+                class LLMConfig:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;provider: str  # "ollama", "openai", "anthropic"<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;model: str<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;api_key: Optional[str] = None<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;base_url: Optional[str] = None<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;temperature: float = 0.7<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;max_tokens: int = 4000
+            </div>
+
+            <h4>🏗️ SimpleMcpClient 주요 메서드</h4>
+
+            <div class="method-signature">
+                def __init__(self, llm_config: LLMConfig)
+            </div>
+            <p><strong>목적:</strong> 클라이언트 초기화 및 설정</p>
+            <ul>
+                <li>LLM 설정 저장</li>
+                <li>연결 및 도구 저장소 초기화</li>
+                <li>대화 히스토리 준비</li>
+            </ul>
+
+            <div class="method-signature">
+                def connect_servers(self, config_file: str = "test.json")
+            </div>
+            <p><strong>목적:</strong> JSON 설정 파일에서 MCP 서버들을 읽어와 연결</p>
+            <div class="code-block">
+# 설정 파일 예시 (test.json)
+{
+    "mcpServers": {
+        "simpledraw": {
+            "command": "python",
+            "args": ["simpledraw.py"]
+        },
+        "godot": {
+            "command": "node",
+            "args": ["godot-mcp/build/index.js"],
+            "env": {
+                "GODOT_PATH": "/path/to/godot"
+            }
+        }
+    }
+}
+            </div>
+
+            <div class="method-signature">
+                def _connect_server(self, server_name: str, server_config: Dict)
+            </div>
+            <p><strong>목적:</strong> 개별 MCP 서버와의 연결 처리</p>
+            <ul>
+                <li>subprocess를 통한 서버 프로세스 시작</li>
+                <li>JSON-RPC initialize 요청 전송</li>
+                <li>initialized 알림 전송</li>
+                <li>연결 상태 관리</li>
+            </ul>
+
+            <div class="method-signature">
+                def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> str
+            </div>
+            <p><strong>목적:</strong> 특정 MCP 서버의 도구 실행</p>
+            <div class="code-block">
+# 도구 호출 예시
+result = client.call_tool(
+    server_name="simpledraw",
+    tool_name="create_image",
+    arguments={
+        "width": 800,
+        "height": 600,
+        "background_color": "white"
+    }
+)
+            </div>
+
+            <div class="method-signature">
+                def chat(self, user_message: str) -> str
+            </div>
+            <p><strong>목적:</strong> 사용자 메시지 처리 및 LLM 응답 생성</p>
+            <ul>
+                <li>시스템 프롬프트 생성 (사용 가능한 도구 포함)</li>
+                <li>LLM API 호출</li>
+                <li>응답에서 도구 호출 파싱</li>
+                <li>도구 실행 후 최종 응답 생성</li>
+            </ul>
+
+            <h4>🔗 LLM 제공자별 구현</h4>
+
+            <div class="method-signature">
+                def _call_ollama(self, messages: List[Dict]) -> str
+            </div>
+            <p>로컬 Ollama 서버와 통신 (기본: http://localhost:11434)</p>
+
+            <div class="method-signature">
+                def _call_openai(self, messages: List[Dict]) -> str
+            </div>
+            <p>OpenAI API 또는 호환 서비스와 통신</p>
+
+            <div class="method-signature">
+                def _call_anthropic(self, messages: List[Dict]) -> str
+            </div>
+            <p>Anthropic Claude API와 통신</p>
+
+            <h4>🎯 도구 호출 파싱</h4>
+            <p>LLM이 다음 XML 형식으로 도구를 호출할 수 있습니다:</p>
+            <div class="code-block">
+&lt;use_mcp_tool&gt;
+&lt;server_name&gt;서버이름&lt;/server_name&gt;
+&lt;tool_name&gt;도구이름&lt;/tool_name&gt;
+&lt;arguments&gt;{"매개변수": "값"}&lt;/arguments&gt;
+&lt;/use_mcp_tool&gt;
+            </div>
+        </div>
+
+        <h2 id="web-ui">🌐 웹 UI 클라이언트</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: client.py</h3>
+            
+            <p>Streamlit을 사용한 웹 기반 사용자 인터페이스로, 비동기 에이전트 시스템을 구현합니다.</p>
+
+            <h4>🔧 주요 기능</h4>
+            
+            <div class="method-signature">
+                async def setup_mcp_servers()
+            </div>
+            <p><strong>목적:</strong> mcp.json 파일에서 MCP 서버 설정을 읽어와 연결</p>
+            <ul>
+                <li>agents 라이브러리의 MCPServerStdio 사용</li>
+                <li>캐시된 도구 목록 사용</li>
+                <li>비동기 연결 관리</li>
+            </ul>
+
+            <div class="method-signature">
+                async def setup_agent()
+            </div>
+            <p><strong>목적:</strong> LLM 에이전트 초기화</p>
+            <div class="code-block">
+agent = Agent(
+    name="Assistant",
+    instructions="너는 유튜브 컨텐츠 분석을 도와주는 에이전트야",
+    model="gpt-4o-mini",
+    mcp_servers=mcp_servers
+)
+            </div>
+
+            <div class="method-signature">
+                async def process_user_message()
+            </div>
+            <p><strong>목적:</strong> 사용자 메시지를 비동기로 처리하고 스트리밍 응답 제공</p>
+            <ul>
+                <li>Runner.run_streamed()를 통한 스트리밍 처리</li>
+                <li>실시간 응답 토큰 출력</li>
+                <li>도구 사용 알림</li>
+                <li>대화 히스토리 관리</li>
+            </ul>
+
+            <h4>🎨 Streamlit UI 구성</h4>
+            <ul>
+                <li><strong>페이지 설정:</strong> "🎥 유튜브 에이전트" 타이틀</li>
+                <li><strong>대화 히스토리:</strong> 세션 상태로 관리</li>
+                <li><strong>실시간 응답:</strong> 토큰 단위 스트리밍</li>
+                <li><strong>도구 알림:</strong> Toast 메시지로 도구 사용 표시</li>
+            </ul>
+        </div>
+
+        <h2 id="manual-client">🔧 수동 클라이언트</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: manual_mcp_client.py</h3>
+            
+            <p>JSON-RPC 프로토콜을 직접 구현한 로우레벨 MCP 클라이언트입니다. 디버깅과 테스트에 유용합니다.</p>
+
+            <h4>🏗️ ManualMCPClient 클래스</h4>
+
+            <div class="method-signature">
+                async def start()
+            </div>
+            <p><strong>목적:</strong> 서버 프로세스 시작</p>
+            <ul>
+                <li>subprocess.Popen으로 서버 실행</li>
+                <li>stdin/stdout 파이프 설정</li>
+                <li>프로세스 ID 추적</li>
+            </ul>
+
+            <div class="method-signature">
+                async def send_request(self, method: str, params: Dict[str, Any] = None) -> Dict[str, Any]
+            </div>
+            <p><strong>목적:</strong> JSON-RPC 요청 전송 및 응답 대기</p>
+            <div class="code-block">
+# JSON-RPC 요청 형식
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+}
+            </div>
+
+            <div class="method-signature">
+                async def initialize()
+            </div>
+            <p><strong>목적:</strong> 완전한 MCP 초기화 시퀀스 실행</p>
+            <ol>
+                <li>initialize 요청 전송</li>
+                <li>서버 응답 확인</li>
+                <li>initialized 알림 전송</li>
+                <li>초기화 완료 확인</li>
+            </ol>
+
+            <div class="method-signature">
+                async def check_server_errors()
+            </div>
+            <p><strong>목적:</strong> 서버 오류 로그 확인 및 프로세스 상태 모니터링</p>
+        </div>
+
+        <h2 id="config">⚙️ 설정 관리</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: config.py</h3>
+            
+            <p>프로젝트 전체의 설정을 통합 관리하는 강력한 설정 시스템입니다.</p>
+
+            <h4>📊 설정 데이터 클래스</h4>
+
+            <div class="method-signature">
+                @dataclass<br>
+                class LLMProviderConfig
+            </div>
+            <p>LLM 제공자별 상세 설정 (API 키, 모델, URL, 토큰 수 등)</p>
+
+            <div class="method-signature">
+                @dataclass<br>
+                class McpServerConfig
+            </div>
+            <p>MCP 서버별 설정 (명령어, 인수, 환경변수, 타임아웃 등)</p>
+
+            <div class="method-signature">
+                @dataclass<br>
+                class AppConfig
+            </div>
+            <p>애플리케이션 전체 설정 통합</p>
+
+            <h4>🔧 ConfigManager 클래스</h4>
+
+            <div class="method-signature">
+                def load_config(self) -> AppConfig
+            </div>
+            <p><strong>설정 로드 우선순위:</strong></p>
+            <ol>
+                <li>기본 설정값</li>
+                <li>설정 파일 (config.json)</li>
+                <li>환경변수 (최고 우선순위)</li>
+            </ol>
+
+            <h4>🌍 환경변수 지원</h4>
+            <table>
+                <tr>
+                    <th>환경변수</th>
+                    <th>목적</th>
+                </tr>
+                <tr>
+                    <td>OPENAI_API_KEY</td>
+                    <td>OpenAI API 키</td>
+                </tr>
+                <tr>
+                    <td>ANTHROPIC_API_KEY</td>
+                    <td>Anthropic API 키</td>
+                </tr>
+                <tr>
+                    <td>OLLAMA_BASE_URL</td>
+                    <td>Ollama 서버 URL</td>
+                </tr>
+                <tr>
+                    <td>MCP_CONFIG_FILE</td>
+                    <td>MCP 설정 파일 경로</td>
+                </tr>
+                <tr>
+                    <td>DEBUG_MODE</td>
+                    <td>디버그 모드 활성화</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2 id="example-server">🧪 예제 MCP 서버</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: example_mcp_server.py</h3>
+            
+            <p>학습과 테스트를 위한 완전한 MCP 서버 구현 예제입니다.</p>
+
+            <h4>🛠️ 제공 도구</h4>
+
+            <table>
+                <tr>
+                    <th>도구명</th>
+                    <th>기능</th>
+                    <th>매개변수</th>
+                </tr>
+                <tr>
+                    <td>get_current_time</td>
+                    <td>현재 시간 조회</td>
+                    <td>format (ISO/readable)</td>
+                </tr>
+                <tr>
+                    <td>calculate</td>
+                    <td>수학 계산</td>
+                    <td>expression (수식)</td>
+                </tr>
+                <tr>
+                    <td>text_analysis</td>
+                    <td>텍스트 분석</td>
+                    <td>text, language</td>
+                </tr>
+                <tr>
+                    <td>generate_uuid</td>
+                    <td>UUID 생성</td>
+                    <td>version, count</td>
+                </tr>
+            </table>
+
+            <h4>🔧 구현 예시</h4>
+            <div class="code-block">
+@app.call_tool()
+async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
+    if name == "get_current_time":
+        format_type = arguments.get("format", "ISO")
+        now = datetime.now()
+        
+        if format_type == "readable":
+            time_str = now.strftime("%Y년 %m월 %d일 %H시 %M분 %S초")
+        else:
+            time_str = now.isoformat()
+        
+        return [TextContent(
+            type="text",
+            text=f"현재 시간: {time_str}"
+        )]
+            </div>
+
+            <h4>📚 리소스 지원</h4>
+            <p>서버 정보와 도구 목록을 리소스로 제공:</p>
+            <ul>
+                <li><strong>server-info:</strong> 서버 버전 및 상태 정보</li>
+                <li><strong>tools-list:</strong> 사용 가능한 도구 목록</li>
+            </ul>
+        </div>
+
+        <h2 id="debug">🐛 디버깅 도구</h2>
+        
+        <div class="file-section">
+            <h3>📄 파일: debug_mcp_raw.py</h3>
+            
+            <p>MCP 통신을 로우레벨에서 분석할 수 있는 디버깅 도구입니다.</p>
+
+            <h4>🔍 디버깅 기능</h4>
+
+            <div class="method-signature">
+                async def debug_mcp_communication()
+            </div>
+            <p><strong>수행 작업:</strong></p>
+            <ul>
+                <li>서버 프로세스 직접 시작</li>
+                <li>JSON-RPC 메시지 원본 확인</li>
+                <li>응답 타임아웃 모니터링</li>
+                <li>stderr 오류 메시지 수집</li>
+                <li>프로세스 상태 추적</li>
+            </ul>
+
+            <h4>📊 출력 정보</h4>
+            <div class="code-block">
+🔍 MCP 통신 디버깅 시작...
+✅ 서버 프로세스 시작됨 (PID: 12345)
+📤 초기화 요청 전송 중...
+요청: {
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  ...
+}
+✅ 초기화 요청 전송됨
+📥 응답 대기 중...
+✅ 응답 수신: {"jsonrpc": "2.0", "id": 1, "result": {...}}
+            </div>
+        </div>
+
+        <h2 id="usage">🚀 사용 방법</h2>
+
+        <h3>1️⃣ 환경 설정</h3>
+        <div class="code-block">
+# 가상환경 생성 및 활성화
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+# 의존성 설치
+pip install -r requirements.txt
+        </div>
+
+        <h3>2️⃣ 설정 파일 준비</h3>
+        <div class="code-block">
+# test.json 예시
+{
+    "mcpServers": {
+        "example": {
+            "command": "python",
+            "args": ["example_mcp_server.py"]
+        }
+    }
+}
+        </div>
+
+        <h3>3️⃣ 메인 클라이언트 실행</h3>
+        <div class="code-block">
+# LLM 설정
+llm_config = LLMConfig(
+    provider="ollama",
+    model="llama3.2",
+    base_url="http://localhost:11434"
+)
+
+# 클라이언트 생성 및 실행
+client = SimpleMcpClient(llm_config)
+client.connect_servers("test.json")
+
+# 대화 시작
+response = client.chat("현재 시간을 알려주세요")
+        </div>
+
+        <h3>4️⃣ 웹 UI 실행</h3>
+        <div class="code-block">
+streamlit run client.py
+        </div>
+
+        <h2 id="development">💻 개발 가이드</h2>
+
+        <h3>🔧 새로운 MCP 서버 추가</h3>
+        <ol>
+            <li><strong>서버 구현:</strong> MCP 표준을 따라 서버 구현</li>
+            <li><strong>설정 추가:</strong> test.json에 서버 설정 추가</li>
+            <li><strong>테스트:</strong> debug_mcp_raw.py로 연결 테스트</li>
+            <li><strong>통합:</strong> 메인 클라이언트에서 사용</li>
+        </ol>
+
+        <h3>🤖 새로운 LLM 제공자 추가</h3>
+        <ol>
+            <li><strong>설정 클래스 확장:</strong> LLMConfig에 새 제공자 추가</li>
+            <li><strong>API 클라이언트 구현:</strong> _call_새제공자() 메서드 구현</li>
+            <li><strong>라우팅 추가:</strong> _call_llm()에서 새 제공자 처리</li>
+            <li><strong>테스트:</strong> 실제 API 호출 테스트</li>
+        </ol>
+
+        <div class="warning">
+            <strong>⚠️ 주의사항:</strong>
+            <ul>
+                <li>MCP 서버는 JSON-RPC 2.0 표준을 따라야 합니다</li>
+                <li>비동기 처리 시 적절한 예외 처리가 필요합니다</li>
+                <li>API 키는 환경변수로 관리하는 것을 권장합니다</li>
+                <li>프로덕션 환경에서는 도구 실행 권한을 신중히 관리해야 합니다</li>
+            </ul>
+        </div>
+
+        <h3>🔍 디버깅 팁</h3>
+        <ul>
+            <li><strong>연결 문제:</strong> debug_mcp_raw.py로 로우레벨 통신 확인</li>
+            <li><strong>도구 호출 문제:</strong> manual_mcp_client.py로 개별 도구 테스트</li>
+            <li><strong>LLM 응답 문제:</strong> 시스템 프롬프트와 도구 명세 확인</li>
+            <li><strong>성능 문제:</strong> 비동기 처리와 타임아웃 설정 점검</li>
+        </ul>
+
+        <h2>📚 참고 자료</h2>
+        <ul>
+            <li><a href="https://modelcontextprotocol.io/">Model Context Protocol 공식 문서</a></li>
+            <li><a href="https://docs.anthropic.com/claude/docs/">Anthropic Claude API 문서</a></li>
+            <li><a href="https://platform.openai.com/docs/">OpenAI API 문서</a></li>
+            <li><a href="https://ollama.ai/">Ollama 프로젝트</a></li>
+            <li><a href="https://streamlit.io/">Streamlit 문서</a></li>
+        </ul>
+
+        <div class="info">
+            <strong>📞 지원:</strong> 이 프로젝트는 MCP와 LLM 통합의 완전한 예제를 제공합니다. 각 컴포넌트는 독립적으로 사용할 수 있도록 설계되었으며, 필요에 따라 확장이 가능합니다.
+        </div>
+
+        <footer style="margin-top: 50px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p><em>이 문서는 MCP 클라이언트 프로젝트의 포괄적인 가이드입니다. 추가 질문이나 개선 사항이 있으시면 언제든 연락해 주세요!</em></p>
+        </footer>
+    </div>
+</body>
+</html> 
