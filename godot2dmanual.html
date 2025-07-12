@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대화형 Godot 2D RPG 개발 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Paper -->
+    <!-- Application Structure Plan: The application is designed as an "Interactive Learning Dashboard" to transform the linear manual into an engaging, explorable roadmap. This non-linear structure allows users to freely navigate between core concepts based on their needs, which is more effective for skill acquisition than a static document. The main view features a visual roadmap of the development process. Clicking a topic opens a detailed modal, keeping the user in a single, focused context. This approach enhances usability and engagement by providing visual feedback (progress chart), direct utility (copyable code), and clear conceptual diagrams. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Development Process -> Goal: Organize/Inform -> Viz: Interactive Roadmap (HTML/CSS) -> Interaction: Click to view details in a modal -> Justification: Visualizes the learning path and allows non-linear exploration.
+        - Report Info: "Call Down, Signal Up" / Scene Tree -> Goal: Inform -> Viz: HTML/CSS diagram -> Interaction: Static visual -> Justification: Clarifies abstract software architecture principles visually.
+        - Report Info: Dialogue Plugin Comparison -> Goal: Compare -> Viz: Interactive HTML Table -> Interaction: Click rows to expand for details -> Justification: Provides a concise summary with on-demand depth, aiding decision-making.
+        - Report Info: Learning Progress -> Goal: Motivate/Inform -> Viz: Chart.js Donut Chart -> Interaction: Updates as user views sections -> Justification: Gamifies the learning experience and gives a sense of accomplishment.
+        - Report Info: Code Examples -> Goal: Inform/Utility -> Viz: Styled <pre> blocks -> Interaction: Copy-to-clipboard button -> Justification: Improves practical usability for a developer audience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .bg-warm-paper { background-color: #fdf6e3; }
+        .bg-warm-base { background-color: #eee8d5; }
+        .bg-warm-highlight { background-color: #fdf6e3; }
+        .text-warm-base { color: #657b83; }
+        .text-warm-heading { color: #073642; }
+        .text-warm-accent { color: #cb4b16; }
+        .border-warm-accent { border-color: #cb4b16; }
+        .border-warm-subtle { border-color: #93a1a1; }
+        .shadow-warm { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 320px;
+        }
+        .roadmap-node::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 2rem; 
+            background-color: #93a1a1;
+        }
+        .roadmap-node:last-child::before {
+            display: none;
+        }
+        .roadmap-node.completed {
+            background-color: #859900;
+            color: #fdf6e3;
+        }
+        .code-block {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-warm-paper text-warm-base">
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-bold text-warm-heading mb-2">Godot 2D 아이소메트릭 RPG</h1>
+            <p class="text-lg text-warm-base">대화형 완전 정복 가이드</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div id="roadmap-container" class="lg:col-span-2 space-y-8">
+                <div class="bg-warm-base p-6 rounded-xl shadow-warm">
+                    <h2 class="text-2xl font-bold text-warm-heading mb-4">학습 로드맵</h2>
+                    <p class="mb-6">이 가이드는 2D 아이소메트릭 RPG 제작 과정을 5개의 주요 파트로 나눕니다. 각 파트는 게임 개발의 핵심 단계를 나타냅니다. 아래 로드맵의 각 노드를 클릭하여 해당 주제에 대한 상세 내용을 학습하고, 자신만의 게임 세계를 창조하는 여정을 시작하세요.</p>
+                    <div id="roadmap-nodes" class="flex flex-col items-center">
+                        <!-- Roadmap nodes will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <aside class="lg:col-span-1 space-y-8">
+                <div class="bg-warm-base p-6 rounded-xl shadow-warm">
+                    <h3 class="text-xl font-bold text-warm-heading mb-4 text-center">학습 진행도</h3>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                    <p id="progressText" class="text-center mt-4 font-bold text-warm-heading">0 / 5 파트 완료</p>
+                </div>
+            </aside>
+
+        </main>
+
+    </div>
+
+    <!-- Modal -->
+    <div id="content-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transform scale-95">
+        <div class="modal-content bg-warm-paper rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col transform scale-100">
+            <div class="p-6 border-b border-warm-base flex justify-between items-center">
+                <h2 id="modal-title" class="text-2xl font-bold text-warm-heading"></h2>
+                <button id="close-modal-btn" class="text-3xl text-warm-base hover:text-warm-accent">&times;</button>
+            </div>
+            <div id="modal-body" class="p-6 sm:p-8 overflow-y-auto">
+                <!-- Content will be injected here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const appData = {
+            parts: [
+                {
+                    id: 'part1',
+                    title: 'Part 1: Godot 엔진과 GDScript, 첫걸음 떼기',
+                    icon: '🚀',
+                    summary: 'Godot의 핵심 철학을 이해하고, GDScript 문법을 익혀 게임의 뇌를 코딩하는 법을 배웁니다.',
+                    content: `
+                        <p class="mb-6">성공적인 게임 개발을 위한 가장 중요한 토대를 마련하는 파트입니다. 엔진의 작동 원리를 깊이 이해하고, 효율적이고 확장 가능한 코드를 작성하는 습관을 처음부터 들이는 것을 목표로 합니다.</p>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-6 mb-3">Godot의 심장: 노드, 씬, 씬 트리</h4>
+                        <p class="mb-4">Godot의 모든 것은 <strong>노드(Node)</strong>라는 작은 기능 단위로 이루어져 있습니다. 이 노드들을 나무처럼 조립하여 <strong>씬(Scene)</strong>이라는 재사용 가능한 부품을 만듭니다. 게임이 실행되면, 이 씬들이 모여 <strong>씬 트리(Scene Tree)</strong>라는 계층 구조를 형성하여 게임 세계를 구성합니다.</p>
+                        <div class="bg-warm-base p-4 rounded-lg my-4 text-center text-sm text-warm-heading">
+                            <p class="font-bold mb-2">씬 트리 구조 예시 (Player.tscn)</p>
+                            <div class="inline-block text-left p-2 border border-warm-subtle rounded-md bg-warm-highlight">
+                                <p>▶ CharacterBody2D (Player)</p>
+                                <p class="ml-4">▶ Sprite2D (외형)</p>
+                                <p class="ml-4">▶ CollisionShape2D (충돌 범위)</p>
+                            </div>
+                            <p class="mt-2 text-xs text-warm-base">부모 노드(Player)를 움직이면 자식 노드들도 함께 따라 움직입니다.</p>
+                        </div>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">GDScript: 플레이어 이동 코드 예제</h4>
+                        <p class="mb-4">GDScript는 파이썬과 유사한 문법을 가져 배우기 쉽고, Godot 엔진과 완벽하게 통합됩니다. 아래는 기본적인 플레이어 이동 코드입니다.</p>
+                        <div class="code-block">
+                        <pre class="bg-warm-base p-4 rounded-lg overflow-x-auto text-sm"><code class="language-gdscript"># Player.gd
+extends CharacterBody2D
+
+@export var speed = 300.0
+
+func _physics_process(delta):
+    # 방향키 입력에 따라 Vector2 값을 반환합니다.
+    var direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+
+    if direction:
+        velocity = direction * speed
+    else:
+        velocity = Vector2.ZERO
+
+    # 캐릭터를 움직이고 벽과 충돌 시 미끄러지게 합니다.
+    move_and_slide()</code></pre>
+                        <button class="copy-btn bg-warm-accent text-white px-2 py-1 rounded text-xs font-bold">복사</button>
+                        </div>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">노드 간의 대화법: "Call Down, Signal Up"</h4>
+                        <p class="mb-4">노드 간의 통신을 잘못 설계하면 코드가 복잡해지고 재사용이 어려워집니다. Godot에서는 "아래로는 호출하고, 위로는 신호를 보내라"는 설계 원칙을 따르는 것이 좋습니다.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-warm-heading text-sm">
+                            <div class="bg-warm-base p-4 rounded-lg">
+                                <p class="font-bold">부모 (명령)</p>
+                                <p class="text-2xl my-2">⬇️</p>
+                                <p>Call Down</p>
+                                <p class="text-xs mt-1 text-warm-base">자식 노드에게 직접 명령(함수 호출)</p>
+                            </div>
+                            <div class="bg-warm-highlight p-4 rounded-lg border-2 border-warm-subtle">
+                                <p class="font-bold">자식 (이벤트 발생)</p>
+                            </div>
+                            <div class="bg-warm-base p-4 rounded-lg">
+                                <p class="font-bold">부모 (수신)</p>
+                                <p class="text-2xl my-2">⬆️</p>
+                                <p>Signal Up</p>
+                                <p class="text-xs mt-1 text-warm-base">이벤트 발생 신호를 보내면 관심있는 누군가(주로 부모)가 듣고 처리</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center mt-3 text-warm-base">이 원칙을 따르면 각 씬은 독립적인 부품처럼 작동하여 재사용성이 크게 향상됩니다.</p>
+                    `
+                },
+                {
+                    id: 'part2',
+                    title: 'Part 2: 아이소메트릭 월드 구축',
+                    icon: '🏞️',
+                    summary: '픽셀 아트, TileMap, Y-Sort 개념을 통합하여 깊이감 있는 아이소메트릭 맵과 8방향 캐릭터를 만듭니다.',
+                    content: `
+                        <p class="mb-6">아트 스타일, 타일맵 설정, 렌더링 순서, 캐릭터 애니메이션을 유기적으로 통합하여 아이소메트릭 세계를 구축합니다. 이 요소들이 어떻게 서로 영향을 미치는지 이해하는 것이 중요합니다.</p>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-6 mb-3">깊이감의 핵심: Y-Sort</h4>
+                        <p class="mb-4">아이소메트릭 뷰에서 객체들이 올바른 순서로 그려지게 하려면(Y좌표가 클수록 앞에 그려짐) <strong>Y-Sort</strong> 기능이 필수적입니다. <code>TileMapLayer</code>나 다른 부모 노드에서 <code>Y Sort Enabled</code> 속성을 켜기만 하면, Godot가 자식 노드들을 Y좌표 기준으로 자동으로 정렬하여 렌더링합니다.</p>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">8방향 애니메이션 코드</h4>
+                        <p class="mb-4">플레이어의 입력 벡터(<code>direction_vector</code>) 각도를 계산하여 0~7 사이의 정수 인덱스로 변환하고, 이를 이용해 올바른 방향의 애니메이션을 재생합니다.</p>
+                        <div class="code-block">
+                        <pre class="bg-warm-base p-4 rounded-lg overflow-x-auto text-sm"><code class="language-gdscript"># Player.gd 일부
+@onready var animated_sprite = $AnimatedSprite2D
+var current_animation_state = "idle"
+var last_direction_index = 2
+
+func _physics_process(delta):
+    var direction_vector = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+
+    if direction_vector != Vector2.ZERO:
+        current_animation_state = "walk"
+        last_direction_index = get_direction_index_from_vector(direction_vector)
+    else:
+        current_animation_state = "idle"
+    
+    play_animation()
+    move_and_slide()
+
+# 방향 벡터를 0-7 인덱스로 변환
+func get_direction_index_from_vector(vec: Vector2) -> int:
+    var angle = snappedf(vec.angle(), PI / 4)
+    return wrapi(roundi(angle / (PI / 4)), 0, 8)
+
+func play_animation():
+    var animation_name = current_animation_state + "_" + str(last_direction_index)
+    if animated_sprite.animation != animation_name:
+        animated_sprite.play(animation_name)</code></pre>
+                        <button class="copy-btn bg-warm-accent text-white px-2 py-1 rounded text-xs font-bold">복사</button>
+                        </div>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">맵에 데이터 심기: 커스텀 데이터 레이어</h4>
+                        <p class="mb-4"><code>TileSet</code>에 보이지 않는 데이터를 추가하여 게임플레이에 영향을 줄 수 있습니다. 예를 들어, 'movement_cost'라는 커스텀 데이터를 타일마다 설정하여 늪지대에서 이동 속도를 늦출 수 있습니다. 이는 맵 에디터 기능의 핵심입니다.</p>
+                    `
+                },
+                {
+                    id: 'part3',
+                    title: 'Part 3: RPG 핵심 메커니즘 구현',
+                    icon: '⚔️',
+                    summary: '데이터 중심 설계를 통해 확장 가능한 인벤토리, 전투, 퀘스트 시스템을 구현합니다.',
+                    content: `
+                        <p class="mb-6">"데이터 중심 설계" 원칙에 따라 RPG의 핵심 시스템을 구현합니다. 게임 데이터를 코드와 분리하여 <code>Resource</code>(.tres 파일)로 관리하면, 유지보수가 쉽고 기획자가 직접 데이터를 수정할 수 있는 유연한 구조를 만들 수 있습니다.</p>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-6 mb-3">인벤토리: 데이터, 로직, UI의 3계층 구조</h4>
+                        <ol class="list-decimal list-inside space-y-2 mb-4">
+                            <li><strong>데이터 계층:</strong> <code>Item.gd</code> (Resource 상속) 스크립트를 만들어 아이템의 속성(이름, 아이콘, 설명 등)을 정의합니다. 'Health Potion.tres'와 같은 데이터 파일을 생성합니다.</li>
+                            <li><strong>로직 계층:</strong> <code>Inventory.gd</code> 스크립트가 아이템 데이터 배열을 관리하며 추가/제거 로직을 담당합니다. UI의 존재는 전혀 알지 못합니다.</li>
+                            <li><strong>표현 계층:</strong> <code>InventoryMenu.tscn</code>이 인벤토리 창 UI를 담당합니다. 로직 계층에서 보낸 시그널을 받아 화면을 업데이트합니다.</li>
+                        </ol>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">전투 시스템: Hitbox와 Hurtbox</h4>
+                        <p class="mb-4"><code>Area2D</code>를 활용한 가볍고 직관적인 실시간 전투 시스템입니다. 물리 충돌 대신 영역 감지를 사용합니다.</p>
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-4 p-4 bg-warm-base rounded-lg text-warm-heading">
+                            <div class="text-center">
+                                <p class="font-bold">Hitbox (공격 범위)</p>
+                                <div class="w-24 h-24 border-2 border-dashed border-red-500 rounded-full flex items-center justify-center m-2">공격!</div>
+                                <p class="text-xs text-warm-base">공격이 발생하는 영역</p>
+                            </div>
+                            <div class="text-3xl text-warm-accent font-bold mx-4">➡️</div>
+                            <div class="text-center">
+                                <p class="font-bold">Hurtbox (피격 범위)</p>
+                                <div class="w-24 h-24 border-2 border-solid border-blue-500 rounded-lg flex items-center justify-center m-2">피격!</div>
+                                <p class="text-xs text-warm-base">피해를 입을 수 있는 영역</p>
+                            </div>
+                        </div>
+                        <p class="text-center mt-2 text-sm">Hitbox가 Hurtbox 영역에 들어오면 <code>area_entered</code> 시그널이 발생하여 데미지 처리를 합니다.</p>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">데이터 중심의 퀘스트 설계</h4>
+                        <p class="mb-4">퀘스트 역시 <code>Quest.gd</code> (Resource 상속)를 만들어 데이터로 관리합니다. 게임 전체의 퀘스트 상태는 <strong>Autoload(싱글톤)</strong>로 등록된 <code>QuestManager</code>가 총괄하며, 다른 시스템(전투, 인벤토리)은 이 매니저를 통해 퀘스트 진행도를 업데이트합니다.</p>
+                    `
+                },
+                {
+                    id: 'part4',
+                    title: 'Part 4: 스토리텔링을 위한 고급 도구',
+                    icon: '📜',
+                    summary: '강력한 대화 시스템을 구축하고, @tool 스크립트로 나만의 맵/시나리오 에디터를 만듭니다.',
+                    content: `
+                        <p class="mb-6">플레이어를 이야기에 몰입시키는 핵심 장치인 대화 시스템과, 개발 편의성을 극대화하는 커스텀 에디터 기능을 만드는 방법을 알아봅니다.</p>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-6 mb-3">강력한 대화 시스템 플러그인 비교</h4>
+                        <p class="mb-4">대화 시스템은 직접 만들 수도 있지만, 잘 만들어진 플러그인을 사용하면 개발 시간을 획기적으로 단축할 수 있습니다. 아래 표에서 플러그인 이름을 클릭하여 상세 정보를 확인하세요.</p>
+                        <div class="w-full overflow-x-auto">
+                            <table id="plugin-table" class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-warm-base text-warm-heading">
+                                        <th class="p-3 border border-warm-subtle">플러그인 이름</th>
+                                        <th class="p-3 border border-warm-subtle">주요 방식</th>
+                                        <th class="p-3 border border-warm-subtle">추천 대상</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="cursor-pointer hover:bg-warm-highlight" data-plugin="dialogic">
+                                        <td class="p-3 border border-warm-subtle font-bold">Dialogic</td>
+                                        <td class="p-3 border border-warm-subtle">UI 기반</td>
+                                        <td class="p-3 border border-warm-subtle">아티스트/기획자 친화적</td>
+                                    </tr>
+                                    <tr class="hidden"><td colspan="3" class="p-4 bg-warm-base border border-warm-subtle text-sm"><strong>특징:</strong> 시각적 노드 기반 편집기 제공, 타임라인을 이용한 연출 기능, 변수/조건 분기 등 기능 내장. 프로그래밍 없이 복잡한 대화와 연출을 만들고 싶은 사용자에게 최적.</td></tr>
+                                    <tr class="cursor-pointer hover:bg-warm-highlight" data-plugin="dialogue-manager">
+                                        <td class="p-3 border border-warm-subtle font-bold">Godot Dialogue Manager</td>
+                                        <td class="p-3 border border-warm-subtle">스크립트 기반</td>
+                                        <td class="p-3 border border-warm-subtle">프로그래머 친화적</td>
+                                    </tr>
+                                    <tr class="hidden"><td colspan="3" class="p-4 bg-warm-base border border-warm-subtle text-sm"><strong>특징:</strong> 자체 문법(.dtl 파일) 사용, 비선형적이고 복잡한 분기 구조에 강력. 코드처럼 대화를 작성하고 게임 로직과 긴밀하게 연동하고 싶은 사용자에게 추천.</td></tr>
+                                    <tr class="cursor-pointer hover:bg-warm-highlight" data-plugin="dialogue-nodes">
+                                        <td class="p-3 border border-warm-subtle font-bold">Dialogue Nodes</td>
+                                        <td class="p-3 border border-warm-subtle">그래프 기반</td>
+                                        <td class="p-3 border border-warm-subtle">시각적 사고 선호자</td>
+                                    </tr>
+                                    <tr class="hidden"><td colspan="3" class="p-4 bg-warm-base border border-warm-subtle text-sm"><strong>특징:</strong> Godot 에디터 내에서 그래프 형태로 대화 흐름 편집, 조건/변수/시그널 등 지원. 대화의 전체적인 흐름을 한눈에 보면서 작업하고 싶은 사용자에게 적합.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">나만의 에디터 만들기: @tool 스크립트</h4>
+                        <p class="mb-4">GDScript 파일 최상단에 <code>@tool</code>을 추가하면, 해당 스크립트는 게임 실행 중뿐만 아니라 <strong>Godot 에디터 내에서도 실행</strong>됩니다. 이를 이용해 개발 편의성을 극대화하는 자신만의 도구를 만들 수 있습니다.</p>
+                        <div class="code-block">
+                        <pre class="bg-warm-base p-4 rounded-lg overflow-x-auto text-sm"><code class="language-gdscript"># VisualEventMapper.gd
+@tool
+extends TileMapLayer
+
+func _draw():
+    # 에디터에서만 실행됨
+    if not Engine.is_editor_hint():
+        return
+    
+    var flag_icon = preload("res://editor_icons/event_flag.png")
+    var used_cells = get_used_cells(0)
+
+    for cell in used_cells:
+        var tile_data = get_cell_tile_data(0, cell)
+        if tile_data:
+            var event_id = tile_data.get_custom_data("event_id")
+            if event_id and not event_id.is_empty():
+                # 이벤트 ID가 있는 타일 위에 아이콘을 그림
+                var world_pos = map_to_local(cell)
+                draw_texture(flag_icon, world_pos)
+</code></pre>
+                        <button class="copy-btn bg-warm-accent text-white px-2 py-1 rounded text-xs font-bold">복사</button>
+                        </div>
+                        <p class="text-sm mt-2">위 코드를 적용하면, 커스텀 데이터에 'event_id'가 있는 타일 위에 에디터에서만 보이는 깃발 아이콘을 그려주어, 시나리오 트리거 위치를 시각적으로 보여주는 <strong>'시나리오 에디터'</strong>가 완성됩니다.</p>
+                    `
+                },
+                {
+                    id: 'part5',
+                    title: 'Part 5: 프로젝트 완성 및 다음 단계',
+                    icon: '🏆',
+                    summary: '게임 저장/불러오기 기능을 구현하고, 더 깊이 학습할 수 있는 추천 자료들을 확인합니다.',
+                    content: `
+                        <p class="mb-6">지금까지 배운 모든 것을 하나로 묶어 완성도를 높이고, 앞으로의 개발 여정을 계속 이어나갈 수 있는 발판을 마련합니다.</p>
+
+                        <h4 class="text-xl font-bold text-warm-heading mt-6 mb-3">저장과 불러오기</h4>
+                        <p class="mb-4">플레이어의 진행 상황(위치, 스탯, 인벤토리, 퀘스트 상태 등)을 하나의 <code>Dictionary</code>로 묶어 JSON 형식으로 파일에 저장하고 불러옵니다. Godot의 <code>FileAccess</code> 클래스를 사용하면 이 과정을 쉽게 구현할 수 있습니다.</p>
+                        <div class="code-block">
+                        <pre class="bg-warm-base p-4 rounded-lg overflow-x-auto text-sm"><code class="language-gdscript"># 저장 함수 예시
+func save_game():
+    var save_data = {
+        "player_position": player.global_position,
+        "inventory": inventory.items,
+        "quests": quest_manager.completed_quests
+    }
+    
+    var file = FileAccess.open("user://savegame.dat", FileAccess.WRITE)
+    file.store_string(JSON.stringify(save_data))
+    file.close()
+
+# 불러오기 함수 예시
+func load_game():
+    if not FileAccess.file_exists("user://savegame.dat"):
+        return
+
+    var file = FileAccess.open("user://savegame.dat", FileAccess.READ)
+    var save_data = JSON.parse_string(file.get_as_text())
+    file.close()
+    
+    # 불러온 데이터로 게임 상태 복원
+    player.global_position = Vector2(save_data.player_position.x, save_data.player_position.y)
+    # ...
+</code></pre>
+                        <button class="copy-btn bg-warm-accent text-white px-2 py-1 rounded text-xs font-bold">복사</button>
+                        </div>
+                        
+                        <h4 class="text-xl font-bold text-warm-heading mt-8 mb-3">추천 학습 자료 및 커뮤니티</h4>
+                        <p class="mb-4">게임 개발은 끊임없는 학습의 과정입니다. 아래 자료들을 통해 더 깊이 탐구해보세요.</p>
+                        <ul class="list-disc list-inside space-y-3">
+                            <li><strong>유튜브 채널:</strong>
+                                <ul class="list-['-_'] list-inside ml-4 space-y-1 mt-1">
+                                    <li><a href="https://www.youtube.com/@Gdquest" target="_blank" class="text-warm-accent hover:underline">GDQuest (전문 개발 패턴)</a></li>
+                                    <li><a href="https://www.youtube.com/@GodotTutorials" target="_blank" class="text-warm-accent hover:underline">Godot Tutorials (GDScript 기초)</a></li>
+                                    <li><a href="https://www.youtube.com/@uheartbeast" target="_blank" class="text-warm-accent hover:underline">HeartBeast (A-RPG 시리즈)</a></li>
+                                </ul>
+                            </li>
+                            <li><strong>GitHub 오픈소스 프로젝트:</strong>
+                                <ul class="list-['-_'] list-inside ml-4 space-y-1 mt-1">
+                                    <li><a href="https://github.com/gdquest-demos/godot-4-2d-pro-game-creation" target="_blank" class="text-warm-accent hover:underline">GDQuest - Make Pro 2D Games (A-RPG)</a></li>
+                                    <li><a href="https://github.com/Lango-dev/Godot-RPG" target="_blank" class="text-warm-accent hover:underline">Lango_GodotRPG (젤다 스타일 RPG)</a></li>
+                                </ul>
+                            </li>
+                            <li><strong>공식 문서:</strong>
+                                <ul class="list-['-_'] list-inside ml-4 space-y-1 mt-1">
+                                    <li><a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/index.html" target="_blank" class="text-warm-accent hover:underline">Godot Step-by-Step Guide</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    `
+                }
+            ],
+            state: {
+                completedParts: new Set(),
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const roadmapNodesContainer = document.getElementById('roadmap-nodes');
+            const modal = document.getElementById('content-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            
+            let progressChart;
+
+            function initRoadmap() {
+                appData.parts.forEach((part, index) => {
+                    const node = document.createElement('div');
+                    node.className = 'roadmap-node relative w-full max-w-md bg-warm-highlight p-4 rounded-lg shadow-warm cursor-pointer transition-transform transform hover:scale-105';
+                    node.dataset.partId = part.id;
+                    node.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">${part.icon}</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-warm-heading">${part.title}</h3>
+                                <p class="text-sm text-warm-base">${part.summary}</p>
+                            </div>
+                        </div>
+                    `;
+                    roadmapNodesContainer.appendChild(node);
+                    
+                    node.addEventListener('click', () => openModal(part.id));
+                });
+            }
+
+            function openModal(partId) {
+                const part = appData.parts.find(p => p.id === partId);
+                if (!part) return;
+
+                modalTitle.textContent = part.title;
+                modalBody.innerHTML = part.content;
+                modal.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                
+                document.body.style.overflow = 'hidden';
+
+                if (!appData.state.completedParts.has(partId)) {
+                    appData.state.completedParts.add(partId);
+                    updateProgress();
+                }
+
+                addEventListenersToModalContent();
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                document.body.style.overflow = 'auto';
+            }
+            
+            function updateProgress() {
+                const completedCount = appData.state.completedParts.size;
+                const totalCount = appData.parts.length;
+                
+                document.getElementById('progressText').textContent = `${completedCount} / ${totalCount} 파트 완료`;
+                
+                const nodeElements = document.querySelectorAll('.roadmap-node');
+                nodeElements.forEach(node => {
+                    if (appData.state.completedParts.has(node.dataset.partId)) {
+                        node.classList.add('completed');
+                    }
+                });
+
+                progressChart.data.datasets[0].data = [completedCount, totalCount - completedCount];
+                progressChart.update();
+            }
+            
+            function initChart() {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['완료', '미완료'],
+                        datasets: [{
+                            data: [0, appData.parts.length],
+                            backgroundColor: ['#859900', '#eee8d5'],
+                            borderColor: '#fdf6e3',
+                            borderWidth: 4,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            function addEventListenersToModalContent() {
+                // Table row expansion
+                const table = document.getElementById('plugin-table');
+                if (table) {
+                    const rows = table.querySelectorAll('tbody tr[data-plugin]');
+                    rows.forEach(row => {
+                        row.addEventListener('click', () => {
+                            const detailRow = row.nextElementSibling;
+                            detailRow.classList.toggle('hidden');
+                        });
+                    });
+                }
+
+                // Copy code button
+                const codeBlocks = modalBody.querySelectorAll('.code-block');
+                codeBlocks.forEach(block => {
+                    const copyBtn = block.querySelector('.copy-btn');
+                    const code = block.querySelector('code').innerText;
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(code).then(() => {
+                            copyBtn.textContent = '복사됨!';
+                            setTimeout(() => { copyBtn.textContent = '복사'; }, 2000);
+                        });
+                    });
+                });
+            }
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('pointer-events-none')) {
+                    closeModal();
+                }
+            });
+
+            initRoadmap();
+            initChart();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
+
