@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM 에이전트 아키텍처 비교 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A tab-based SPA dashboard is chosen to transform the dense, comparative report into an interactive, non-linear exploration tool. The structure includes: [Overview], [Framework Analysis], [Custom Stack Analysis], [Head-to-Head Comparison], and [Conclusion]. This component-based structure allows users to easily navigate to sections of interest, compare concepts in parallel, and engage with data through interactive charts and decision matrices. This is superior to a linear document for usability because it facilitates direct comparison and personalizes the information discovery process based on the user's specific goals (e.g., prototyping vs. building a core product). -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Overall comparison -> Goal: Introduce the core dilemma -> Presentation: [Overview] tab with summary text and key takeaways.
+        - Report Info: Framework/Custom Stack Pros & Cons -> Goal: Detail the characteristics of each approach -> Presentation: [Framework Analysis] & [Custom Stack Analysis] tabs using a card-based grid layout with icons (HTML/CSS) to organize features and concepts visually.
+        - Report Info: Performance Benchmarks (Latency/Memory) -> Goal: Quantitatively compare performance -> Viz: A Bar Chart (Chart.js/Canvas) in the [Head-to-Head] tab provides an immediate visual summary of the overhead.
+        - Report Info: Detailed Architectural Trade-offs Table -> Goal: Provide an in-depth, feature-by-feature comparison -> Presentation: A clear, styled HTML table in the [Head-to-Head] tab.
+        - Report Info: Strategic Decision Framework -> Goal: Guide user to the right choice for their context -> Interaction: An interactive button-based "Decision Matrix" in the [Head-to-Head] tab that dynamically shows the recommended path.
+        - Report Info: Final Recommendation & Hybrid Strategy -> Goal: Conclude and offer future-proof advice -> Presentation: Clear text blocks and cards in the [Conclusion] tab.
+        - Justification: This multi-faceted approach combines text, diagrams (HTML/CSS), and data visualization (Canvas) to cater to different learning styles, making the complex technical information highly accessible and engaging.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', 'Inter', sans-serif; }
+        .tab-btn.active { 
+            border-color: #3b82f6; 
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .decision-btn.active {
+            background-color: #2563eb;
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">에이전틱 LLM 시스템 아키텍처 분석</h1>
+            <p class="mt-3 text-lg text-slate-600">프레임워크 활용 vs 커스텀 스택 직접 구현: 심층 비교</p>
+        </header>
+
+        <nav class="mb-8 border-b border-slate-200">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="tab-navigation">
+                <li><a href="#" class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300" data-tab="overview">개요</a></li>
+                <li><a href="#" class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300" data-tab="framework">프레임워크 분석</a></li>
+                <li><a href="#" class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300" data-tab="custom">커스텀 스택 분석</a></li>
+                <li><a href="#" class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300" data-tab="comparison">핵심 비교</a></li>
+                <li><a href="#" class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-blue-600 hover:border-blue-300" data-tab="conclusion">최종 결론</a></li>
+            </ul>
+        </nav>
+
+        <main id="tab-content">
+            <div id="overview" class="tab-pane space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">아키텍처 선택의 딜레마</h2>
+                    <p class="text-slate-600 leading-relaxed">LLM 기반 에이전트 시스템 구축 시 개발자는 중요한 기로에 섭니다: LangChain 같은 기존 프레임워크를 활용하여 개발 속도를 높일 것인가, 아니면 장기적인 제어권과 최적화를 위해 커스텀 스택을 직접 구현할 것인가? 이 선택은 프로젝트의 성공과 직결되는 전략적 결정입니다.</p>
+                    <p class="text-slate-600 leading-relaxed mt-4">본 분석은 두 접근법의 핵심 장단점을 심층적으로 비교하여, 프로젝트의 목표(예: 빠른 프로토타입, 고도의 커스터마이징이 필요한 MCP 서버 구축 등)에 맞는 최적의 아키텍처 경로를 선택할 수 있도록 돕습니다.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <h3 class="text-xl font-semibold text-slate-800 mb-2">프레임워크 접근법</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li>사전 구축된 컴포넌트로 <span class="font-semibold text-blue-600">개발 속도 극대화</span></li>
+                            <li>복잡한 RAG, 메모리 관리 등을 <span class="font-semibold text-blue-600">추상화하여 단순화</span></li>
+                            <li>LangSmith 등 <span class="font-semibold text-blue-600">강력한 생태계</span> 활용</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-teal-500">
+                        <h3 class="text-xl font-semibold text-slate-800 mb-2">커스텀 스택 접근법</h3>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600">
+                            <li>아키텍처에 대한 <span class="font-semibold text-teal-600">완벽한 제어권</span> 확보</li>
+                            <li><span class="font-semibold text-teal-600">최적의 성능</span>과 투명성으로 디버깅 용이</li>
+                            <li>외부 의존성 최소화로 <span class="font-semibold text-teal-600">장기적 유지보수성</span> 향상</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="framework" class="tab-pane hidden space-y-6">
+                 <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">프레임워크: 추상화를 통한 개발 가속</h2>
+                    <p class="text-slate-600 leading-relaxed">LangChain/LangGraph와 같은 프레임워크는 LLM 애플리케이션 개발의 복잡성을 관리하고, 공통된 패턴을 표준화하여 개발자가 비즈니스 로직에 집중할 수 있도록 설계되었습니다. 이는 막대한 '생산성 대출'과 같아서, 기능이 풍부한 애플리케이션을 신속하게 구축할 수 있게 해줍니다.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg mb-2 text-blue-700">핵심 추상화</h3>
+                        <p class="text-slate-600">PromptTemplates, LCEL, Output Parsers 등은 LLM과의 상호작용을 모듈화하고 재사용 가능하게 만들어, 코드의 가독성과 관리 용이성을 높입니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg mb-2 text-blue-700">에이전틱 툴킷</h3>
+                        <p class="text-slate-600">복잡한 RAG 파이프라인, 대화 메모리, 외부 도구(API, DB) 연동 기능을 사전 패키징하여 제공함으로써 개발 노력을 극적으로 줄여줍니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg mb-2 text-blue-700">상태 기반 워크플로우 (LangGraph)</h3>
+                        <p class="text-slate-600">단순한 체인을 넘어, 순환, 조건 분기, 상태 유지가 가능한 복잡한 에이전트(예: 다중 에이전트 시스템)를 그래프 기반으로 설계할 수 있습니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow col-span-1 md:col-span-2 lg:col-span-3">
+                         <h3 class="font-bold text-lg mb-2 text-red-700">잠재적 단점</h3>
+                        <p class="text-slate-600">높은 초기 생산성은 장기적으로 <span class="font-semibold">유연성 부족, 디버깅의 어려움, 유지보수 오버헤드</span>라는 비용을 수반할 수 있습니다. 추상화 계층이 오히려 '블랙박스'로 작용하여 문제 해결을 더 어렵게 만들기도 합니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="custom" class="tab-pane hidden space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">커스텀 스택: 제어, 투명성, 그리고 성능</h2>
+                    <p class="text-slate-600 leading-relaxed">커스텀 스택은 에이전트의 핵심 로직을 직접 구현하여 아키텍처에 대한 완전한 소유권을 갖는 접근법입니다. 초기 엔지니어링 비용이 더 높지만, 프로덕션 환경에서 요구되는 안정성, 성능, 유지보수성 측면에서 장기적인 이점을 제공합니다.</p>
+                </div>
+                 <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg mb-2 text-teal-700">제1원칙 아키텍처</h3>
+                        <p class="text-slate-600">모델 인터페이스, 도구 디스패처, 추론 루프, 상태 관리 등 에이전트의 모든 구성요소를 직접 제어합니다. 이는 "마법"을 제거하고 모든 동작을 명시적으로 만듭니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-lg mb-2 text-teal-700">"추상화의 폭정" 극복</h3>
+                        <p class="text-slate-600">프레임워크의 경직성, 불안정성, 의존성 비대 문제에서 자유롭습니다. 코드가 단순하고 투명하여 디버깅이 직관적이고 용이합니다.</p>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">커스텀 MCP 서버 아키텍처 예시</h3>
+                    <p class="text-slate-600 mb-4">독자적인 모델 컨텍스트 프로토콜(MCP) 서버는 상태 관리를 위한 강력한 패턴입니다. 상태 조작과 응답 생성을 분리하여 시스템의 예측 가능성과 신뢰성을 높입니다.</p>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                        <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                            <p class="font-semibold text-teal-800">1. 상태 추출 (State Extraction)</p>
+                            <p class="text-sm text-teal-700">사용자 메시지와 현재 상태를 LLM에 보내<br>상태 변경사항(JSON)을 추출</p>
+                        </div>
+                        <div class="text-2xl font-mono text-teal-500">&rarr;</div>
+                        <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg">
+                            <p class="font-semibold text-teal-800">2. 응답 생성 (Response Generation)</p>
+                            <p class="text-sm text-teal-700">업데이트된 상태를 LLM에 보내<br>다음 자연어 응답을 생성</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="comparison" class="tab-pane hidden space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4 text-center">성능 및 자원 오버헤드 비교</h2>
+                    <p class="text-center text-slate-600 mb-6">프레임워크의 추상화 계층은 측정 가능한 오버헤드를 발생시킵니다. 직접 API 호출은 지연 시간과 메모리 사용량 측면에서 더 효율적입니다.</p>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4 text-center">아키텍처 장단점 요약</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">차원</th>
+                                    <th scope="col" class="px-6 py-3">프레임워크 중심</th>
+                                    <th scope="col" class="px-6 py-3">커스텀 스택</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium">초기 개발 속도</td>
+                                    <td class="px-6 py-4 text-blue-600 font-semibold">매우 높음</td>
+                                    <td class="px-6 py-4 text-teal-600 font-semibold">낮음-중간</td>
+                                </tr>
+                                <tr class="bg-slate-50 border-b">
+                                    <td class="px-6 py-4 font-medium">장기적 유지보수성</td>
+                                    <td class="px-6 py-4 text-red-600 font-semibold">낮음-중간</td>
+                                    <td class="px-6 py-4 text-green-600 font-semibold">높음</td>
+                                </tr>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium">성능 (지연/메모리)</td>
+                                    <td class="px-6 py-4 text-red-600 font-semibold">더 낮음</td>
+                                    <td class="px-6 py-4 text-green-600 font-semibold">더 높음</td>
+                                </tr>
+                                <tr class="bg-slate-50 border-b">
+                                    <td class="px-6 py-4 font-medium">세부 제어 및 유연성</td>
+                                    <td class="px-6 py-4 text-red-600 font-semibold">낮음</td>
+                                    <td class="px-6 py-4 text-green-600 font-semibold">완전함</td>
+                                </tr>
+                                <tr class="bg-white border-b">
+                                    <td class="px-6 py-4 font-medium">디버깅 경험</td>
+                                    <td class="px-6 py-4 text-red-600 font-semibold">어려움 (블랙박스)</td>
+                                    <td class="px-6 py-4 text-green-600 font-semibold">간단함 (투명함)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4 text-center">전략적 의사결정 매트릭스</h2>
+                    <p class="text-center text-slate-600 mb-6">당신의 프로젝트 목표에 가장 적합한 접근법은 무엇일까요?</p>
+                    <div class="flex justify-center space-x-4 mb-6">
+                        <button class="decision-btn px-6 py-3 rounded-lg font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all duration-200" data-decision="framework">🚀 빠른 프로토타입</button>
+                        <button class="decision-btn px-6 py-3 rounded-lg font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all duration-200" data-decision="custom">🏛️ 핵심 프로덕트</button>
+                    </div>
+                    <div id="decision-result" class="p-6 bg-blue-50 border border-blue-200 rounded-lg text-center transition-opacity duration-300 opacity-0">
+                        <h3 id="decision-title" class="text-xl font-bold text-blue-800 mb-2"></h3>
+                        <p id="decision-text" class="text-blue-700"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="conclusion" class="tab-pane hidden space-y-6">
+                 <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">권장 아키텍처 경로</h2>
+                    <p class="text-slate-600 leading-relaxed">독자적인 <span class="font-semibold">"모델 컨텍스트 프로토콜(MCP)" 서버</span>와 같이 고도의 제어와 최적화가 필요한 워크플로우를 구축하려는 명시적인 목표를 고려할 때, <span class="font-bold text-green-700">커스텀 스택 접근법</span>을 강력히 권장합니다.</p>
+                    <p class="text-slate-600 leading-relaxed mt-2">상태 표현 및 조작에 대한 완전한 제어는 프레임워크의 추상화된 상태 관리와 근본적으로 상충될 수 있습니다. 커스텀 구현은 MCP의 잠재력을 최대한 실현하고, 애플리케이션의 고유한 요구사항에 완벽하게 맞춰진 투명하고 신뢰성 있는 시스템을 보장하는 유일한 방법입니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4">이분법을 넘어서: 하이브리드 전략</h3>
+                    <p class="text-slate-600 mb-4">선택은 거대한 프레임워크와 모든 것을 처음부터 구축하는 것 사이의 극단적인 이분법이 아닙니다. 경량의 '원자적' 라이브러리를 활용하여 두 세계의 장점을 모두 취할 수 있습니다.</p>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                            <h4 class="font-semibold">PydanticAI / Instructor</h4>
+                            <p class="text-sm text-slate-500">구조화된 출력 강제</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                             <h4 class="font-semibold">FastAPI</h4>
+                            <p class="text-sm text-slate-500">경량 API 서버</p>
+                        </div>
+                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                             <h4 class="font-semibold">직접 SDK 호출</h4>
+                            <p class="text-sm text-slate-500">LLM 상호작용</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-2">미래 지향적 아키텍처 원칙</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li><span class="font-semibold">모듈성(Modularity):</span> 시스템을 느슨하게 결합된 서비스 집합으로 설계합니다.</li>
+                        <li><span class="font-semibold">명시성(Explicitness):</span> "마법"을 피하고 핵심 로직을 코드로 명확히 드러냅니다.</li>
+                        <li><span class="font-semibold">기본에 집중:</span> 상태, 도구, 추론 루프 등 변치 않는 핵심 요소에 집중합니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const panes = document.querySelectorAll('.tab-pane');
+            const performanceChartCanvas = document.getElementById('performanceChart');
+            const decisionButtons = document.querySelectorAll('.decision-btn');
+            const decisionResult = document.getElementById('decision-result');
+            const decisionTitle = document.getElementById('decision-title');
+            const decisionText = document.getElementById('decision-text');
+
+            function switchTab(tab) {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                panes.forEach(pane => pane.classList.add('hidden'));
+                const activePaneId = tab.getAttribute('data-tab');
+                const activePane = document.getElementById(activePaneId);
+                activePane.classList.remove('hidden');
+
+                if (activePaneId === 'comparison' && performanceChartCanvas && !window.performanceChartInstance) {
+                    renderPerformanceChart();
+                }
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(e.target);
+                });
+            });
+
+            switchTab(tabs[0]);
+
+            function renderPerformanceChart() {
+                const ctx = performanceChartCanvas.getContext('2d');
+                window.performanceChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['지연 시간 (Latency)', '메모리 사용량'],
+                        datasets: [
+                            {
+                                label: '프레임워크',
+                                data: [125, 150],
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '커스텀 스택 (직접 API)',
+                                data: [100, 90],
+                                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: '프레임워크 vs 커스텀 스택 성능 비교 (상대값)',
+                                font: { size: 16 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + ' (상대값)';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '상대적 오버헤드'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const decisionData = {
+                framework: {
+                    title: "프레임워크 접근법 추천",
+                    text: "프로젝트가 프로토타입/PoC 단계이거나, 시장 출시 속도가 최우선 순위일 때, 또는 표준적인 RAG 챗봇과 같은 패턴에 부합할 때 가장 효과적입니다."
+                },
+                custom: {
+                    title: "커스텀 스택 접근법 추천",
+                    text: "애플리케이션이 핵심적이고 장기적인 제품이거나, 성능/신뢰성이 타협 불가능할 때, 비표준적인 로직을 요구하는 경우에 가장 적합합니다. 강력한 엔지니어링 역량이 필수적입니다."
+                }
+            };
+
+            decisionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const decision = button.dataset.decision;
+                    
+                    decisionButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    decisionResult.classList.remove('opacity-0');
+                    decisionTitle.textContent = decisionData[decision].title;
+                    decisionText.textContent = decisionData[decision].text;
+
+                    if(decision === 'framework') {
+                        decisionResult.className = decisionResult.className.replace(/border-teal-200 bg-teal-50/g, 'border-blue-200 bg-blue-50');
+                        decisionTitle.className = decisionTitle.className.replace(/text-teal-800/g, 'text-blue-800');
+                        decisionText.className = decisionText.className.replace(/text-teal-700/g, 'text-blue-700');
+                    } else {
+                        decisionResult.className = decisionResult.className.replace(/border-blue-200 bg-blue-50/g, 'border-teal-200 bg-teal-50');
+                        decisionTitle.className = decisionTitle.className.replace(/text-blue-800/g, 'text-teal-800');
+                        decisionText.className = decisionText.className.replace(/text-blue-700/g, 'text-teal-700');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
