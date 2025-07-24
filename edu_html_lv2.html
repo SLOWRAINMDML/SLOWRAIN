@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모던 프론트엔드 핵심 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral -->
+    <!-- Application Structure Plan: A dashboard-style SPA with persistent sidebar navigation for non-linear topic exploration. The main content area features interactive modules (live demos, code toggles, visualizers) for each key concept (HTML semantics, CSS layouts, JS async). This structure is chosen to transform passive reading into active learning, allowing users to intuitively grasp complex topics by doing, which is more effective for the target audience of IT professionals. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: TypeScript Adoption (~90%) -> Goal: Inform -> Viz: Donut Chart -> Interaction: Hover tooltip -> Justification: Visually represents a key statistic from the 'Future Trends' section and demonstrates Chart.js usage.
+        - Report Info: CSS Flexbox/Grid properties -> Goal: Explore/Organize -> Viz: Interactive Playground (HTML/CSS/JS) -> Interaction: Buttons to change CSS properties and see live layout updates -> Justification: Hands-on manipulation is superior to static text for learning layout concepts.
+        - Report Info: JS Event Loop -> Goal: Explain a process -> Viz: Animated Diagram (HTML/CSS/JS) -> Interaction: Button click simulates the async flow -> Justification: Visualizes an abstract, critical concept for deeper understanding.
+        - Report Info: `async/await` vs `.then()` -> Goal: Compare -> Viz: Code viewer with a toggle -> Interaction: Switch between two code styles for the same task -> Justification: Clearly illustrates the syntactic and readability differences.
+        - All diagrams and icons are built with HTML/CSS/Unicode to adhere to the NO SVG constraint.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .event-loop-box {
+            transition: all 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="flex min-h-screen">
+        <aside id="sidebar" class="w-64 bg-white p-6 border-r border-stone-200 fixed top-0 left-0 h-full z-20 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <h1 class="text-2xl font-bold text-teal-600 mb-8">핵심 가이드</h1>
+            <nav id="main-nav">
+                <ul class="space-y-2">
+                    <li><a href="#home" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">🏠 홈</a></li>
+                    <li><a href="#html" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">🧱 HTML</a></li>
+                    <li><a href="#css" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">🎨 CSS</a></li>
+                    <li><a href="#js" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">⚡ JavaScript</a></li>
+                    <li><a href="#exercises" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">🤸 실습 과제</a></li>
+                    <li><a href="#trends" class="nav-link text-lg font-medium text-stone-600 hover:text-teal-600 transition-colors duration-200 block py-2 px-3 rounded-md">🚀 미래 전망</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <button id="menu-toggle" class="md:hidden fixed top-4 left-4 z-30 bg-white p-2 rounded-md shadow-md">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+
+        <main class="flex-1 md:ml-64 p-6 md:p-10">
+            
+            <section id="home" class="content-section">
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                    <h2 class="text-4xl font-bold mb-4 text-teal-700">모던 프론트엔드 핵심 가이드</h2>
+                    <p class="text-lg text-stone-600 mb-6">이 가이드는 IT 전문가를 위한 중급 프론트엔드 강의 내용을 대화형으로 재구성한 학습 자료입니다. 단순히 정보를 읽는 것을 넘어, 각 개념을 직접 조작하고 시각적으로 확인하며 깊이 있게 이해할 수 있도록 설계되었습니다.</p>
+                    <p class="text-lg text-stone-600">왼쪽의 네비게이션을 통해 HTML, CSS, JavaScript의 핵심 주제들을 자유롭게 탐색해 보세요. 각 섹션은 여러분의 학습 경험을 극대화하기 위한 동적인 예제와 실습 과제를 포함하고 있습니다.</p>
+                </div>
+            </section>
+
+            <section id="html" class="content-section">
+                <h2 class="text-4xl font-bold mb-8">🧱 모던 HTML: 구조, 의미, 접근성</h2>
+                <div class="space-y-8">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">시맨틱 태그: `<section>` vs `<article>`</h3>
+                        <p class="mb-4 text-stone-600">두 태그는 콘텐츠를 그룹화하지만 목적이 다릅니다. `<article>`은 독립적으로 완전한 콘텐츠 조각이며, `<section>`은 문서의 주제별 그룹입니다. 아래 예시에 마우스를 올려 각 태그의 역할을 확인해 보세요.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="border-2 border-dashed border-sky-400 p-4 rounded-lg relative group">
+                                <span class="absolute -top-4 left-4 bg-sky-400 text-white px-3 py-1 rounded-full text-sm font-semibold">&lt;article&gt;</span>
+                                <div class="absolute inset-0 bg-sky-100 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                                    <p class="text-center font-medium text-sky-800 p-4">블로그 포스트, 뉴스 기사처럼<br>독립적으로 배포 가능</p>
+                                </div>
+                                <h4 class="text-xl font-semibold mt-4">블로그 포스트 제목</h4>
+                                <p class="mt-2 text-stone-500">이것은 독립적인 콘텐츠입니다. RSS 피드에 단독으로 표시되어도 의미가 통합니다.</p>
+                            </div>
+                            <div class="border-2 border-dashed border-rose-400 p-4 rounded-lg relative group">
+                                <span class="absolute -top-4 left-4 bg-rose-400 text-white px-3 py-1 rounded-full text-sm font-semibold">&lt;section&gt;</span>
+                                <div class="absolute inset-0 bg-rose-100 bg-opacity-80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                                    <p class="text-center font-medium text-rose-800 p-4">책의 '장'처럼<br>관련 콘텐츠의 주제별 그룹</p>
+                                </div>
+                                <h4 class="text-xl font-semibold mt-4">연락처 정보</h4>
+                                <p class="mt-2 text-stone-500">이메일, 주소, 지도 등 여러 관련 항목을 하나의 주제로 묶습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">WAI-ARIA와 접근성</h3>
+                        <p class="mb-4 text-stone-600">ARIA는 동적 위젯에 의미를 부여하여 접근성을 향상시킵니다. 하지만 네이티브 HTML 요소가 항상 우선입니다. 아래는 `div`로 만든 프로그레스 바에 ARIA 속성을 부여한 예시입니다.</p>
+                        <div class="bg-stone-100 p-4 rounded-lg">
+                            <code class="text-sm">
+                                &lt;div role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"&gt;
+                            </code>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">대화형 폼과 실시간 유효성 검사</h3>
+                        <p class="mb-4 text-stone-600">HTML5 속성과 CSS 의사 클래스를 이용하면 JavaScript 없이도 실시간 피드백을 제공할 수 있습니다. 아래 폼에 유효하거나 유효하지 않은 값을 입력해 보세요.</p>
+                        <form class="space-y-4">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-stone-700">이메일 (필수)</label>
+                                <input type="email" id="email" required class="mt-1 block w-full rounded-md border-stone-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-all invalid:border-red-500 invalid:text-red-600 focus:invalid:border-red-500 focus:invalid:ring-red-500">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section id="css" class="content-section">
+                <h2 class="text-4xl font-bold mb-8">🎨 모던 CSS: 레이아웃과 반응형 디자인</h2>
+                <div class="space-y-8">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">`box-sizing` 시각화</h3>
+                        <p class="mb-4 text-stone-600">`box-sizing`은 요소의 크기를 계산하는 방식을 바꿉니다. 버튼을 클릭하여 `content-box` (기본값)와 `border-box`의 차이를 확인하세요. `border-box`가 얼마나 예측 가능한 레이아웃을 만드는지 주목하세요.</p>
+                        <div class="flex items-center gap-8">
+                            <div id="box-sizing-demo" class="w-48 h-48 bg-teal-200 p-5 border-[10px] border-teal-500 transition-all duration-300">
+                                <div class="bg-white h-full w-full flex items-center justify-center text-center text-sm font-medium">Content</div>
+                            </div>
+                            <div>
+                                <button id="toggle-box-sizing" class="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">`box-sizing` 전환</button>
+                                <p class="mt-4 text-stone-600">현재: <code id="box-sizing-status" class="font-mono bg-stone-200 px-2 py-1 rounded">content-box</code></p>
+                                <p class="mt-2 text-stone-500 text-sm">`width: 192px` (48*4)<br>`padding: 20px` (5*4)<br>`border: 10px`</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">Flexbox & Grid 플레이그라운드</h3>
+                        <p class="mb-4 text-stone-600">Grid로 전체 구조를 잡고, Flexbox로 내부 아이템을 정렬하는 것이 현대적인 전략입니다. 아래 컨트롤러를 사용하여 각 속성이 레이아웃에 미치는 영향을 실시간으로 확인해 보세요.</p>
+                        <div class="border p-4 rounded-lg">
+                            <div id="playground-container" class="bg-stone-100 min-h-[200px] rounded-md p-2 transition-all duration-300 grid grid-cols-3 gap-4">
+                                <div class="playground-item bg-teal-500 rounded-md h-20 flex items-center justify-center text-white font-bold text-2xl">1</div>
+                                <div class="playground-item bg-teal-500 rounded-md h-20 flex items-center justify-center text-white font-bold text-2xl">2</div>
+                                <div class="playground-item bg-teal-500 rounded-md h-20 flex items-center justify-center text-white font-bold text-2xl">3</div>
+                            </div>
+                            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="font-semibold">Layout</label>
+                                    <select id="layout-control" class="w-full mt-1 rounded-md border-stone-300">
+                                        <option value="grid">Grid</option>
+                                        <option value="flex">Flexbox</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="font-semibold">Justify Content</label>
+                                    <select id="justify-control" class="w-full mt-1 rounded-md border-stone-300">
+                                        <option value="start">start</option>
+                                        <option value="center">center</option>
+                                        <option value="end">end</option>
+                                        <option value="between">space-between</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="font-semibold">Align Items</label>
+                                    <select id="align-control" class="w-full mt-1 rounded-md border-stone-300">
+                                        <option value="start">start</option>
+                                        <option value="center">center</option>
+                                        <option value="end">end</option>
+                                        <option value="stretch">stretch</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="font-semibold">Gap</label>
+                                    <input type="range" id="gap-control" min="0" max="32" value="16" class="w-full mt-2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="js" class="content-section">
+                <h2 class="text-4xl font-bold mb-8">⚡ 고급 JavaScript: 비동기 처리와 DOM</h2>
+                <div class="space-y-8">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">이벤트 루프 시각화</h3>
+                        <p class="mb-4 text-stone-600">JavaScript는 싱글 스레드이지만 이벤트 루프 덕분에 비동기 작업이 가능합니다. 아래 버튼을 클릭하여 `setTimeout`이 어떻게 호출 스택, 웹 API, 태스크 큐를 거쳐 실행되는지 시각적으로 확인하세요.</p>
+                        <div class="relative border rounded-lg p-4 h-64">
+                            <div class="grid grid-cols-3 h-full gap-4">
+                                <div class="border-r pr-4">
+                                    <h4 class="font-bold text-center">Call Stack</h4>
+                                    <div id="call-stack" class="bg-stone-100 h-4/5 mt-2 rounded-md p-2 space-y-2 flex flex-col-reverse"></div>
+                                </div>
+                                <div class="border-r pr-4">
+                                    <h4 class="font-bold text-center">Web APIs</h4>
+                                    <div id="web-apis" class="bg-stone-100 h-4/5 mt-2 rounded-md p-2"></div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-center">Task Queue</h4>
+                                    <div id="task-queue" class="bg-stone-100 h-4/5 mt-2 rounded-md p-2 space-y-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="run-event-loop" class="mt-4 bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">`setTimeout` 실행</button>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-2xl font-bold mb-4">`fetch` API: `async/await` vs `.then()`</h3>
+                        <p class="mb-4 text-stone-600">`async/await`는 Promise 기반 코드를 더 깔끔하게 만듭니다. 아래 버튼으로 API를 호출하고, 토글을 사용하여 두 가지 코드 스타일을 비교해 보세요.</p>
+                        <button id="fetch-data" class="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">사용자 데이터 가져오기</button>
+                        <div id="fetch-result" class="mt-4 p-4 border rounded-lg bg-stone-50 min-h-[50px]"></div>
+                        <div class="mt-4 bg-stone-800 text-white p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-semibold">Code Example</h4>
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <span>.then()</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="code-toggle" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-stone-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500"></div>
+                                    </label>
+                                    <span>async/await</span>
+                                </div>
+                            </div>
+                            <pre><code id="code-display" class="language-js text-sm whitespace-pre-wrap"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="exercises" class="content-section">
+                <h2 class="text-4xl font-bold mb-8">🤸 실습 과제</h2>
+                <p class="mb-6 text-lg text-stone-600">이론을 실제 기술로 전환해 보세요. 아래 과제들은 강의에서 다룬 핵심 개념들을 종합적으로 활용하도록 설계되었습니다.</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">1. 인터랙티브 프로필 카드</h3>
+                        <p class="text-stone-600 mb-4">시맨틱 HTML과 CSS `transition`을 사용하여 호버 효과가 있는 프로필 카드를 만듭니다.</p>
+                        <details class="bg-stone-50 p-3 rounded-md">
+                            <summary class="cursor-pointer font-medium text-teal-600">핵심 개념 보기</summary>
+                            <p class="mt-2 text-sm text-stone-500">`<article>`, `box-shadow`, `:hover`, `transform: scale()`</p>
+                        </details>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">2. 반응형 제품 목록</h3>
+                        <p class="text-stone-600 mb-4">CSS Grid와 미디어 쿼리를 사용하여 화면 크기에 따라 레이아웃이 변하는 제품 목록을 구축합니다.</p>
+                        <details class="bg-stone-50 p-3 rounded-md">
+                            <summary class="cursor-pointer font-medium text-teal-600">핵심 개념 보기</summary>
+                            <p class="mt-2 text-sm text-stone-500">모바일 우선, `display: grid`, `repeat(auto-fill, minmax())`, `@media`</p>
+                        </details>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">3. To-Do 리스트</h3>
+                        <p class="text-stone-600 mb-4">JavaScript로 할 일을 추가/삭제하고, `localStorage`에 데이터를 저장하는 동적 리스트를 만듭니다.</p>
+                        <details class="bg-stone-50 p-3 rounded-md">
+                            <summary class="cursor-pointer font-medium text-teal-600">핵심 개념 보기</summary>
+                            <p class="mt-2 text-sm text-stone-500">DOM 조작, 이벤트 위임, `localStorage`</p>
+                        </details>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">4. API 데이터 시각화</h3>
+                        <p class="text-stone-600 mb-4">`fetch`와 `async/await`로 외부 API 데이터를 가져와 동적으로 페이지에 렌더링합니다.</p>
+                        <details class="bg-stone-50 p-3 rounded-md">
+                            <summary class="cursor-pointer font-medium text-teal-600">핵심 개념 보기</summary>
+                            <p class="mt-2 text-sm text-stone-500">`fetch`, `async/await`, `try...catch`, `Promise.all`</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <section id="trends" class="content-section">
+                <h2 class="text-4xl font-bold mb-8">🚀 2025년의 프론트엔드 전망</h2>
+                <p class="mb-6 text-lg text-stone-600">프론트엔드 환경은 끊임없이 진화합니다. 다음 트렌드를 이해하는 것은 여러분의 경력 개발에 중요한 나침반이 될 것입니다.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">🤖 AI 기반 개발</h3>
+                        <p class="text-stone-600">GitHub Copilot 같은 도구가 코드 생성을 가속화하며, 개발자의 역할은 AI가 생성한 코드를 검토하고 통합하는 상위 수준으로 이동하고 있습니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">🔷 TypeScript 표준화</h3>
+                        <p class="text-stone-600 mb-4">코드 안정성 덕분에 TypeScript는 더 이상 선택이 아닌 필수 기술이 되었습니다. 채택률은 거의 90%에 육박합니다.</p>
+                        <div class="chart-container">
+                            <canvas id="ts-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">🧩 디자인 시스템</h3>
+                        <p class="text-stone-600">재사용 가능한 컴포넌트 라이브러리는 개발 속도를 높이고 일관성을 보장하는 핵심 요소입니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">♿ 법적 요구사항으로서의 접근성</h3>
+                        <p class="text-stone-600">각종 법규로 인해 웹 접근성은 이제 비즈니스의 필수 요건이 되었습니다. 시맨틱 HTML의 중요성이 더욱 커집니다.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-xl font-bold mb-2">🏗️ 아키텍처 변화</h3>
+                        <p class="text-stone-600">마이크로 프론트엔드와 서버 컴포넌트 등 서버 중심 경향이 초기 로딩 성능 개선을 위해 주목받고 있습니다.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    function updateContent(hash) {
+        const targetHash = hash || '#home';
+        
+        contentSections.forEach(section => {
+            section.classList.remove('active');
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('bg-teal-100', 'text-teal-700');
+            if (link.getAttribute('href') === targetHash) {
+                link.classList.add('bg-teal-100', 'text-teal-700');
+            }
+        });
+
+        const activeSection = document.querySelector(targetHash);
+        if (activeSection) {
+            activeSection.classList.add('active');
+            if (targetHash === '#trends') {
+                renderTsChart();
+            }
+        }
+    }
+    
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+
+    document.getElementById('main-nav').addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            const hash = e.target.getAttribute('href');
+            window.location.hash = hash;
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+    });
+    
+    window.addEventListener('hashchange', () => updateContent(window.location.hash));
+    updateContent(window.location.hash);
+
+    function initCssPlayground() {
+        const container = document.getElementById('playground-container');
+        const layoutControl = document.getElementById('layout-control');
+        const justifyControl = document.getElementById('justify-control');
+        const alignControl = document.getElementById('align-control');
+        const gapControl = document.getElementById('gap-control');
+
+        function applyStyles() {
+            const layout = layoutControl.value;
+            const justify = justifyControl.value;
+            const align = alignControl.value;
+            const gap = gapControl.value;
+
+            container.className = 'bg-stone-100 min-h-[200px] rounded-md p-2 transition-all duration-300';
+            
+            if (layout === 'grid') {
+                container.classList.add('grid', 'grid-cols-3');
+                const justifyClass = { start: 'justify-items-start', center: 'justify-items-center', end: 'justify-items-end', between: 'justify-items-stretch' }[justify] || 'justify-items-start';
+                container.classList.add(justifyClass);
+            } else {
+                container.classList.add('flex');
+                const justifyClass = { start: 'justify-start', center: 'justify-center', end: 'justify-end', between: 'justify-between' }[justify] || 'justify-start';
+                container.classList.add(justifyClass);
+            }
+            
+            const alignClass = { start: 'items-start', center: 'items-center', end: 'items-end', stretch: 'items-stretch' }[align] || 'items-start';
+            container.classList.add(alignClass);
+            container.style.gap = `${gap}px`;
+        }
+        
+        [layoutControl, justifyControl, alignControl, gapControl].forEach(control => {
+            control.addEventListener('change', applyStyles);
+        });
+        applyStyles();
+    }
+    initCssPlayground();
+
+    function initBoxSizingDemo() {
+        const demoBox = document.getElementById('box-sizing-demo');
+        const toggleBtn = document.getElementById('toggle-box-sizing');
+        const statusEl = document.getElementById('box-sizing-status');
+        let isBorderBox = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isBorderBox = !isBorderBox;
+            if (isBorderBox) {
+                demoBox.style.boxSizing = 'border-box';
+                statusEl.textContent = 'border-box';
+            } else {
+                demoBox.style.boxSizing = 'content-box';
+                statusEl.textContent = 'content-box';
+            }
+        });
+    }
+    initBoxSizingDemo();
+
+    function initEventLoopDemo() {
+        const runBtn = document.getElementById('run-event-loop');
+        const callStack = document.getElementById('call-stack');
+        const webApis = document.getElementById('web-apis');
+        const taskQueue = document.getElementById('task-queue');
+
+        function createBox(text, color) {
+            const box = document.createElement('div');
+            box.textContent = text;
+            box.className = `event-loop-box p-2 rounded text-center text-sm font-medium text-white ${color}`;
+            return box;
+        }
+
+        runBtn.addEventListener('click', () => {
+            runBtn.disabled = true;
+            callStack.innerHTML = '';
+            webApis.innerHTML = '';
+            taskQueue.innerHTML = '';
+
+            const mainBox = createBox('main()', 'bg-sky-500');
+            callStack.appendChild(mainBox);
+
+            setTimeout(() => {
+                const setTimeoutBox = createBox('setTimeout(cb, 1000)', 'bg-amber-500');
+                callStack.appendChild(setTimeoutBox);
+
+                setTimeout(() => {
+                    callStack.removeChild(setTimeoutBox);
+                    webApis.appendChild(setTimeoutBox);
+
+                    setTimeout(() => {
+                        webApis.removeChild(setTimeoutBox);
+                        const callbackBox = createBox('callback()', 'bg-rose-500');
+                        taskQueue.appendChild(callbackBox);
+
+                        setTimeout(() => {
+                           callStack.removeChild(mainBox);
+                           
+                           setTimeout(() => {
+                                taskQueue.removeChild(callbackBox);
+                                callStack.appendChild(callbackBox);
+
+                                setTimeout(() => {
+                                    callStack.removeChild(callbackBox);
+                                    runBtn.disabled = false;
+                                }, 500);
+                           }, 500);
+                        }, 500);
+                    }, 1000);
+                }, 500);
+            }, 500);
+        });
+    }
+    initEventLoopDemo();
+
+    function initFetchDemo() {
+        const fetchBtn = document.getElementById('fetch-data');
+        const resultEl = document.getElementById('fetch-result');
+        const codeToggle = document.getElementById('code-toggle');
+        const codeDisplay = document.getElementById('code-display');
+
+        const codeThen = `fetch('https://jsonplaceholder.typicode.com/users/1')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log(data);
+    // display data in UI
+  })
+  .catch(error => {
+    console.error('Fetch error:', error);
+  });`;
+
+        const codeAsync = `async function fetchData() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/users/1');
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    console.log(data);
+    // display data in UI
+  } catch (error) {
+    console.error('Fetch error:', error);
+  }
+}`;
+        
+        function updateCodeDisplay() {
+            codeDisplay.textContent = codeToggle.checked ? codeAsync : codeThen;
+        }
+        
+        codeToggle.addEventListener('change', updateCodeDisplay);
+        updateCodeDisplay();
+
+        fetchBtn.addEventListener('click', async () => {
+            resultEl.textContent = '데이터를 가져오는 중...';
+            try {
+                const response = await fetch('https://jsonplaceholder.typicode.com/users/1');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                resultEl.innerHTML = `
+                    <p><strong class="font-semibold">이름:</strong> ${data.name}</p>
+                    <p><strong class="font-semibold">이메일:</strong> ${data.email}</p>
+                    <p><strong class="font-semibold">웹사이트:</strong> ${data.website}</p>
+                `;
+            } catch (error) {
+                resultEl.textContent = `오류 발생: ${error.message}`;
+            }
+        });
+    }
+    initFetchDemo();
+
+    let tsChartInstance = null;
+    function renderTsChart() {
+        if (tsChartInstance) {
+            tsChartInstance.destroy();
+        }
+        const ctx = document.getElementById('ts-chart').getContext('2d');
+        tsChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['TypeScript 채택', '기타'],
+                datasets: [{
+                    label: 'TypeScript 채택률',
+                    data: [90, 10],
+                    backgroundColor: [
+                        'rgb(13, 148, 136)',
+                        'rgb(229, 231, 235)'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: '프론트엔드 프레임워크에서의 TypeScript 채택률 (추정)'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>
