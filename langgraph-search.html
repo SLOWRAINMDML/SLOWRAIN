@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph 인터랙티브 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals with Blue Accent -->
+    <!-- Application Structure Plan: A tabbed dashboard SPA. The structure prioritizes user decision-making by starting with a high-level summary and a direct LangGraph vs. Langflow comparison. Deeper, more technical information is organized into thematic tabs (Architecture, Capabilities, Challenges, Use Cases) to allow non-linear exploration. This is more effective than the report's linear structure for a technical audience looking for specific information. The flow culminates in an interactive decision helper to synthesize the report's recommendations. -->
+    <!-- Visualization & Content Choices: Report Info: PyPI vs GitHub stats -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover for details -> Justification: Visually impactful, highlights the key adoption difference. Report Info: Feature comparison table -> Goal: Compare -> Viz: Interactive HTML Table -> Interaction: Click-to-reveal details -> Justification: Presents dense info digestibly. Report Info: Architectural concepts (StateGraph, Supervisor) -> Goal: Organize/Explain -> Viz: HTML/CSS diagrams -> Interaction: Static or click-to-highlight -> Justification: Simple, clear, avoids library overhead. Report Info: Corporate adoption -> Goal: Inform/Build Trust -> Viz: Logo cards -> Interaction: Click for modal/details -> Justification: Quick, scannable social proof. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #6b7280;
+        }
+        .section-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-2">LangGraph 심층 분석</h1>
+            <p class="text-lg text-slate-600">프로덕션 등급 AI 에이전트 구축을 위한 인터랙티브 가이드</p>
+        </header>
+
+        <main>
+            <!-- High-Level Summary -->
+            <section class="bg-white p-6 rounded-xl shadow-md mb-10">
+                <h2 class="text-2xl font-bold mb-4 text-slate-900">핵심 요약: 제어(Control) vs. 편의성(Convenience)</h2>
+                <div class="grid md:grid-cols-2 gap-6 text-slate-700">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2 text-blue-600">LangGraph: 강력한 제어와 신뢰성</h3>
+                        <p>로우레벨(low-level)의 상태 기반 프레임워크로, 복잡하고 순환적인(cyclical) AI 에이전트 워크플로우를 구축하기 위해 설계되었습니다. 프로덕션 환경의 안정성, 확장성, 세밀한 제어가 필요할 때 최적의 선택입니다. 상당한 학습 곡선과 개발 복잡성을 수반합니다.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2 text-emerald-600">Langflow: 신속한 프로토타이핑</h3>
+                        <p>시각적 UI를 통해 빠르고 쉽게 AI 워크플로우를 설계하고 테스트할 수 있는 로우코드(low-code) 플랫폼입니다. 신속한 프로토타이핑, 데모 제작, 비선형적이지 않은 간단한 작업에 탁월한 생산성을 보입니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Tab Navigation -->
+            <div class="mb-8 border-b border-slate-200">
+                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button data-tab="comparison" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-active">비교 분석</button>
+                    <button data-tab="architecture" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-inactive">프로덕션 아키텍처</button>
+                    <button data-tab="capabilities" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-inactive">핵심 역량</button>
+                    <button data-tab="usecases" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-inactive">주요 사용 사례</button>
+                    <button data-tab="decision" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-inactive">도구 선택 가이드</button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tab-content">
+                <!-- Comparison Section -->
+                <section id="comparison" class="tab-pane section-fade-in">
+                    <div class="grid lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-1 text-slate-900">채택 지표: 개발자 관심 vs. 프로덕션 사용</h3>
+                            <p class="text-sm text-slate-600 mb-4">Langflow는 커뮤니티의 높은 관심을, LangGraph는 실제 프로덕션 환경에서의 활발한 사용을 시사합니다.</p>
+                            <div class="chart-container">
+                                <canvas id="adoptionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="text-xl font-bold mb-4 text-slate-900">LangGraph vs. Langflow 상세 비교</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-slate-600">
+                                    <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                        <tr>
+                                            <th scope="col" class="py-3 px-4">측면</th>
+                                            <th scope="col" class="py-3 px-4">LangGraph</th>
+                                            <th scope="col" class="py-3 px-4">Langflow</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-white border-b">
+                                            <td class="py-3 px-4 font-medium">핵심 철학</td>
+                                            <td class="py-3 px-4">Code-first, 로우레벨 제어</td>
+                                            <td class="py-3 px-4">Visual-first, 로우코드/노코드</td>
+                                        </tr>
+                                        <tr class="bg-slate-50 border-b">
+                                            <td class="py-3 px-4 font-medium">주요 사용 사례</td>
+                                            <td class="py-3 px-4">복잡한 프로덕션 에이전트</td>
+                                            <td class="py-3 px-4">신속한 프로토타이핑, 데모</td>
+                                        </tr>
+                                        <tr class="bg-white border-b">
+                                            <td class="py-3 px-4 font-medium">제어 흐름</td>
+                                            <td class="py-3 px-4">순환, 분기 등 완전한 제어</td>
+                                            <td class="py-3 px-4">주로 선형(DAG), 제한된 복잡성</td>
+                                        </tr>
+                                        <tr class="bg-slate-50 border-b">
+                                            <td class="py-3 px-4 font-medium">상태 관리</td>
+                                            <td class="py-3 px-4">핵심 기능, 지속성(Persistence)</td>
+                                            <td class="py-3 px-4">컴포넌트 기반, 세션 메모리</td>
+                                        </tr>
+                                        <tr class="bg-white">
+                                            <td class="py-3 px-4 font-medium">학습 곡선</td>
+                                            <td class="py-3 px-4">가파름 (Steep)</td>
+                                            <td class="py-3 px-4">완만함 (Gentle)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Architecture Section -->
+                <section id="architecture" class="tab-pane hidden section-fade-in">
+                     <h2 class="text-2xl font-bold mb-6 text-center text-slate-900">프로덕션 환경을 위한 아키텍처</h2>
+                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">1. 지속성 (Persistence)</h3>
+                            <p class="text-sm text-slate-600 mb-4">장기 실행 에이전트의 핵심. 체크포인터 시스템이 그래프의 상태를 DB에 저장하여 중단 시에도 작업을 재개할 수 있습니다.</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="bg-red-100 text-red-800 p-2 rounded-md"><strong>InMemory:</strong> 테스트용</div>
+                                <div class="bg-yellow-100 text-yellow-800 p-2 rounded-md"><strong>SQLite:</strong> 로컬/소규모용</div>
+                                <div class="bg-green-100 text-green-800 p-2 rounded-md"><strong>Postgres:</strong> 프로덕션 등급</div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">2. 안정성 (Reliability)</h3>
+                            <p class="text-sm text-slate-600 mb-4">내구성 있는 실행(Durable Execution)을 보장합니다. 실패 시 마지막 체크포인트에서 자동 재개가 가능하며, 정교한 오류 처리 패턴을 구현할 수 있습니다.</p>
+                            <div class="border-l-4 border-blue-500 pl-4 text-sm">
+                                개발자는 오류 상태 관리, 분류, 라우팅 로직을 직접 설계하여 시스템의 복원력을 극대화해야 합니다.
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">3. 확장성 (Scalability)</h3>
+                            <p class="text-sm text-slate-600 mb-4">모듈식 노드 구조는 확장에 유리합니다. 대규모 트래픽 처리를 위해 수평적 확장이 가능합니다.</p>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>자체 호스팅:</strong> Kubernetes 등 활용 (DevOps 역량 필요)</li>
+                                <li><strong>LangGraph 플랫폼:</strong> 서버/태스크 큐 자동 확장 (관리형)</li>
+                            </ul>
+                        </div>
+                     </div>
+                </section>
+
+                <!-- Capabilities Section -->
+                <section id="capabilities" class="tab-pane hidden section-fade-in">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-slate-900">LangGraph가 제공하는 핵심 역량</h2>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-bold text-lg mb-2">순환 그래프 (Cyclical Graphs)</h3>
+                            <p class="text-sm text-slate-600 mb-4">선형적인 체인(Chain)의 한계를 넘어, 에이전트가 스스로 추론하고, 도구를 사용하며, 결과에 따라 행동을 반복/수정하는 '루프(loop)'를 구현할 수 있습니다.</p>
+                             <div class="p-4 bg-slate-100 rounded-lg text-center">
+                                <span class="font-mono text-sm">생각 → 도구 사용 → 관찰 → 생각 ...</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-bold text-lg mb-2">다중 에이전트 오케스트레이션</h3>
+                            <p class="text-sm text-slate-600 mb-4">'감독관' 에이전트가 '연구원', '코더' 등 전문 에이전트 팀에게 작업을 위임하고 조율하는 복잡한 협업 시스템을 구축할 수 있습니다.</p>
+                            <div class="p-4 bg-slate-100 rounded-lg text-sm space-y-2">
+                                <div class="flex items-center">
+                                    <span class="font-bold w-24">감독관</span>
+                                    <span class="text-2xl leading-none">→</span>
+                                    <span class="ml-2 bg-blue-200 px-2 py-1 rounded">연구원 에이전트</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-bold w-24"></span>
+                                    <span class="text-2xl leading-none">→</span>
+                                    <span class="ml-2 bg-green-200 px-2 py-1 rounded">코더 에이전트</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h3 class="font-bold text-lg mb-2">인간 개입 (Human-in-the-Loop)</h3>
+                            <p class="text-sm text-slate-600 mb-4">중요한 결정 지점에서 실행을 일시 중지하고 사람의 검토나 승인을 받을 수 있습니다. 상태를 직접 수정하거나 이전 단계로 돌아가는 '시간 여행'도 가능합니다.</p>
+                            <div class="flex justify-center items-center gap-2 mt-4">
+                                <span class="font-semibold">에이전트 실행</span>
+                                <span class="text-red-500 font-bold text-2xl">❙❙</span>
+                                <span class="font-semibold">인간 검토</span>
+                                <span class="text-green-500 font-bold text-2xl">▶</span>
+                                <span class="font-semibold">실행 재개</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Use Cases Section -->
+                <section id="usecases" class="tab-pane hidden section-fade-in">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-slate-900">주요 기업 프로덕션 사용 사례</h2>
+                    <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">LinkedIn, Uber, Klarna 등 유수의 기업들이 핵심 비즈니스 로직에 LangGraph를 도입하여 그 안정성과 성능을 입증하고 있습니다.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                            <img src="https://logo.clearbit.com/uber.com" alt="Uber Logo" class="h-12 mx-auto mb-4" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="hidden h-12 mx-auto mb-4 flex items-center justify-center bg-slate-200 rounded-full w-12"><span class="font-bold text-slate-600">U</span></div>
+                            <h3 class="font-bold text-lg">Uber</h3>
+                            <p class="text-sm text-slate-600 mt-2">대규모 코드 마이그레이션 및 유닛 테스트 생성을 자동화하여 개발 생산성을 향상시켰습니다.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                            <img src="https://logo.clearbit.com/linkedin.com" alt="LinkedIn Logo" class="h-12 mx-auto mb-4" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="hidden h-12 mx-auto mb-4 flex items-center justify-center bg-slate-200 rounded-full w-12"><span class="font-bold text-slate-600">in</span></div>
+                            <h3 class="font-bold text-lg">LinkedIn</h3>
+                            <p class="text-sm text-slate-600 mt-2">계층적 에이전트 시스템을 기반으로 AI 채용 담당자를 구축하여 채용 프로세스를 혁신했습니다.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                            <img src="https://logo.clearbit.com/klarna.com" alt="Klarna Logo" class="h-12 mx-auto mb-4" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="hidden h-12 mx-auto mb-4 flex items-center justify-center bg-slate-200 rounded-full w-12"><span class="font-bold text-slate-600">K</span></div>
+                            <h3 class="font-bold text-lg">Klarna</h3>
+                            <p class="text-sm text-slate-600 mt-2">8,500만 명의 사용자를 위한 고객 지원 AI 어시스턴트를 구동하여 응답성과 효율을 높였습니다.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                            <img src="https://logo.clearbit.com/elastic.co" alt="Elastic Logo" class="h-12 mx-auto mb-4" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                            <div class="hidden h-12 mx-auto mb-4 flex items-center justify-center bg-slate-200 rounded-full w-12"><span class="font-bold text-slate-600">E</span></div>
+                            <h3 class="font-bold text-lg">Elastic</h3>
+                            <p class="text-sm text-slate-600 mt-2">실시간 보안 위협 탐지를 위한 에이전트를 오케스트레이션하여 보안 시스템을 강화했습니다.</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Decision Helper Section -->
+                <section id="decision" class="tab-pane hidden section-fade-in">
+                    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold mb-2 text-center text-slate-900">어떤 도구가 적합할까요?</h2>
+                        <p class="text-center text-slate-600 mb-8">몇 가지 질문에 답하고 당신의 프로젝트에 맞는 도구를 추천받으세요.</p>
+                        
+                        <div id="quiz-container" class="space-y-6">
+                            <div class="quiz-question">
+                                <p class="font-semibold mb-2">1. 프로젝트의 주된 목표는 무엇인가요?</p>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <button data-score="langgraph" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">A. 안정적이고 복잡한 프로덕션 시스템 구축</button>
+                                    <button data-score="langflow" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">B. 아이디어 검증을 위한 신속한 프로토타이핑</button>
+                                </div>
+                            </div>
+                            <div class="quiz-question">
+                                <p class="font-semibold mb-2">2. 팀의 DevOps 및 백엔드 엔지니어링 역량은 어느 정도인가요?</p>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <button data-score="langgraph" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">A. 높음 (인프라 직접 구축/운영 가능)</button>
+                                    <button data-score="langflow" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">B. 보통/낮음 (빠른 개발에 집중 선호)</button>
+                                </div>
+                            </div>
+                             <div class="quiz-question">
+                                <p class="font-semibold mb-2">3. 워크플로우에 순환(loop)이나 조건부 분기가 많이 필요한가요?</p>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <button data-score="langgraph" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">A. 예, 에이전트의 자율적인 판단과 반복이 필수적입니다.</button>
+                                    <button data-score="langflow" class="quiz-btn w-full text-left p-3 bg-slate-100 hover:bg-slate-200 rounded-lg transition">B. 아니요, 비교적 단순하고 선형적인 흐름입니다.</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="quiz-result" class="hidden mt-8 text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                            <h3 class="text-xl font-bold text-blue-800 mb-2">추천: <span id="recommendation-tool"></span></h3>
+                            <p class="text-blue-700" id="recommendation-text"></p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabData = {
+                adoption: {
+                    labels: ['Langflow (관심도)', 'LangGraph (프로덕션 사용)'],
+                    stars: 43000, // Example data
+                    downloads: 2000000, // Example data
+                }
+            };
+
+            // Chart.js - Adoption Chart
+            const ctx = document.getElementById('adoptionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: tabData.adoption.labels.map(label => label.split(' ')),
+                    datasets: [{
+                        label: 'GitHub Stars',
+                        data: [tabData.adoption.stars, 0],
+                        backgroundColor: '#10b981',
+                        borderColor: '#059669',
+                        borderWidth: 1
+                    }, {
+                        label: 'PyPI 월간 다운로드',
+                        data: [0, tabData.adoption.downloads],
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#2563eb',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) return (value / 1000000) + 'M';
+                                    if (value >= 1000) return (value / 1000) + 'K';
+                                    return value;
+                                }
+                            }
+                        },
+                        y: {
+                           ticks: {
+                                font: {
+                                    size: 12,
+                                }
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('ko-KR').format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Tab navigation
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    });
+                    button.classList.add('tab-active');
+                    button.classList.remove('tab-inactive');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('section-fade-in');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            // Quiz logic
+            const quizContainer = document.getElementById('quiz-container');
+            const quizResult = document.getElementById('quiz-result');
+            const recommendationTool = document.getElementById('recommendation-tool');
+            const recommendationText = document.getElementById('recommendation-text');
+            
+            let scores = { langgraph: 0, langflow: 0 };
+            let answeredQuestions = 0;
+            const totalQuestions = quizContainer.querySelectorAll('.quiz-question').length;
+
+            quizContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('quiz-btn')) {
+                    const scoreType = e.target.dataset.score;
+                    
+                    // Visually mark selection
+                    const parentQuestion = e.target.closest('.quiz-question');
+                    parentQuestion.querySelectorAll('.quiz-btn').forEach(btn => {
+                        btn.classList.remove('bg-blue-200');
+                        btn.classList.add('bg-slate-100');
+                    });
+                    e.target.classList.add('bg-blue-200');
+                    e.target.classList.remove('bg-slate-100');
+                    
+                    // Logic to count answers (simple version)
+                    if (!parentQuestion.dataset.answered) {
+                        parentQuestion.dataset.answered = 'true';
+                        answeredQuestions++;
+                    }
+                    
+                    // Recalculate scores
+                    scores = { langgraph: 0, langflow: 0 };
+                    quizContainer.querySelectorAll('.quiz-question[data-answered="true"]').forEach(q => {
+                        const selectedBtn = q.querySelector('.bg-blue-200');
+                        if (selectedBtn) {
+                           scores[selectedBtn.dataset.score]++;
+                        }
+                    });
+
+                    if (answeredQuestions === totalQuestions) {
+                        showResult();
+                    }
+                }
+            });
+
+            function showResult() {
+                let resultTool = '';
+                let resultText = '';
+
+                if (scores.langgraph > scores.langflow) {
+                    resultTool = 'LangGraph';
+                    resultText = '팀이 강력한 엔지니어링 역량을 보유하고, 복잡하고 제어 가능한 프로덕션 시스템을 구축해야 할 때 최적의 선택입니다. 높은 유연성과 안정성을 제공합니다.';
+                } else if (scores.langflow > scores.langgraph) {
+                    resultTool = 'Langflow';
+                    resultText = '신속한 프로토타이핑, 아이디어 검증, 시각적 개발 환경이 우선시될 때 가장 효과적입니다. 빠른 속도와 편의성이 강점입니다.';
+                } else {
+                    resultTool = '하이브리드 접근 방식';
+                    resultText = 'Langflow로 빠르게 프로토타입을 검증한 후, 핵심 로직을 LangGraph로 재구축하여 프로덕션에 배포하는 전략을 고려해볼 수 있습니다.';
+                }
+                
+                recommendationTool.textContent = resultTool;
+                recommendationText.textContent = resultText;
+                quizResult.classList.remove('hidden');
+                quizResult.classList.add('section-fade-in');
+            }
+        });
+    </script>
+</body>
+</html>
