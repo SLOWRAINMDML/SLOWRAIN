@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 LLM 동향 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Tech Blue Accent -->
+    <!-- Application Structure Plan: A single-page application with a fixed top navigation bar for smooth scrolling between thematic sections: '홈 (Home)', '주요 동향 (Key Trends)', 'LLM별 상세 비교 (Detailed Comparison)', and '업무 활용 (Workplace Impact)'. This hub-and-spoke structure is chosen over a linear document format to allow business professionals to quickly navigate to their area of interest—be it a high-level overview, a deep dive into a specific model, or practical business applications. Interactivity is centered on the 'Comparison' section, with dynamic charts and content reveals to facilitate direct comparison between models, which is a primary task for this audience. -->
+    <!-- Visualization & Content Choices: 
+        1.  LLM Feature Comparison -> Goal: Compare multiple models across multiple capabilities -> Viz: Radar Chart (Chart.js) -> Interaction: Checkboxes to toggle models on/off -> Justification: Provides an intuitive visual summary of a model's strengths and weaknesses relative to others.
+        2.  Coding Performance -> Goal: Show ranked performance on a specific benchmark (SWE-bench) -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Hover tooltips for precise scores -> Justification: Clearly and effectively displays rankings for a single, crucial metric mentioned in the report.
+        3.  Key Technology Trends -> Goal: Organize and explain core technological shifts -> Presentation: Tabbed content view (HTML/JS) -> Interaction: Clicking tabs reveals relevant descriptive content -> Justification: Organizes complex information into digestible, thematic chunks without cluttering the UI.
+        4.  Model Details -> Goal: Provide a detailed look at each major LLM -> Presentation: Interactive cards (HTML/JS) -> Interaction: Clicking on a company logo reveals a detailed card -> Justification: A clean, user-driven way to explore details on demand. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 600px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .active-nav {
+            color: #2563eb;
+            font-weight: 700;
+            border-bottom: 2px solid #2563eb;
+        }
+        .inactive-nav {
+            color: #4b5563;
+        }
+        .active-tab {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .inactive-tab {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .model-logo {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .model-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+        .model-logo.selected {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-blue-600">2025 LLM 동향 리포트</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium active-nav">홈</a>
+                        <a href="#trends" class="nav-link px-3 py-2 rounded-md text-sm font-medium inactive-nav">주요 동향</a>
+                        <a href="#comparison" class="nav-link px-3 py-2 rounded-md text-sm font-medium inactive-nav">LLM별 상세 비교</a>
+                        <a href="#impact" class="nav-link px-3 py-2 rounded-md text-sm font-medium inactive-nav">업무 활용</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="py-16 sm:py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl font-bold tracking-tight sm:text-5xl">2025년 하반기, LLM 경쟁의 현재</h2>
+                <p class="mt-4 text-lg text-slate-600">GPT-5, Gemini 2.5 등 차세대 모델의 등장으로 더욱 치열해진 AI 시장의 판도를 분석합니다.</p>
+                <div class="mt-10">
+                    <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg text-left">
+                        <h3 class="text-2xl font-bold mb-4">Executive Summary</h3>
+                        <p class="text-slate-700 leading-relaxed">2025년 현재 대규모 언어 모델(LLM) 분야에서는 OpenAI, Google, Anthropic, Meta 등 여러 기업이 치열한 경쟁을 펼치고 있습니다. 2023년 ChatGPT의 성공 이후 LLM 혁신이 가속화되어, 불과 2년 만에 차세대 모델들이 등장했습니다. 각 모델은 고도화된 추론 능력, 멀티모달 처리, 코딩 보조 등 저마다의 강점을 앞세워 빠르게 발전하고 있습니다. 최신 LLM들은 복잡한 문제에 스스로 추가 사고를 하는 '깊은 사고' 기능을 내장하고 있으며, 텍스트를 넘어 이미지, 비디오까지 이해하는 멀티모달 능력이 표준이 되었습니다. 이러한 경쟁은 사용자들에게 더 강력한 AI 도구를 제공하는 한편, 업무 환경에도 큰 변화를 가져오고 있습니다.</p>
+                        <div class="mt-8">
+                            <h4 class="text-lg font-semibold text-center mb-4 text-slate-500">주요 LLM 플레이어</h4>
+                            <div class="flex justify-center items-center flex-wrap gap-4 sm:gap-8">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=OpenAI" alt="OpenAI Logo" class="h-10 sm:h-12" title="OpenAI">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=Google" alt="Google Logo" class="h-10 sm:h-12" title="Google">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=Anthropic" alt="Anthropic Logo" class="h-10 sm:h-12" title="Anthropic">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=Meta" alt="Meta Logo" class="h-10 sm:h-12" title="Meta">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=DeepSeek" alt="DeepSeek Logo" class="h-10 sm:h-12" title="DeepSeek">
+                                <img src="https://placehold.co/120x50/FFFFFF/000000?text=xAI" alt="xAI Logo" class="h-10 sm:h-12" title="xAI">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="trends" class="py-16 sm:py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">핵심 기술 동향</h2>
+                    <p class="mt-4 text-lg text-slate-600">2025년 LLM 시장을 주도하는 4가지 핵심 기술적 흐름을 소개합니다.</p>
+                </div>
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="mb-4 flex flex-wrap justify-center gap-2">
+                        <button data-tab="trend1" class="tab-button px-4 py-2 rounded-md font-semibold active-tab">내장된 "깊은 사고"</button>
+                        <button data-tab="trend2" class="tab-button px-4 py-2 rounded-md font-semibold inactive-tab">멀티모달 & 장문 처리</button>
+                        <button data-tab="trend3" class="tab-button px-4 py-2 rounded-md font-semibold inactive-tab">코딩 능력 강화</button>
+                        <button data-tab="trend4" class="tab-button px-4 py-2 rounded-md font-semibold inactive-tab">AI 안전성 및 정책</button>
+                    </div>
+                    <div id="tab-content" class="p-6 bg-slate-50 rounded-lg shadow-inner min-h-[250px]">
+                        <div id="trend1" class="tab-pane">
+                            <h3 class="text-xl font-bold mb-2">내장된 “깊은 사고” 기능</h3>
+                            <p class="text-slate-700">최신 LLM들은 쉬운 질문에는 신속히 답하고 복잡한 문제에는 스스로 추가적인 사고 과정을 거치는 모드를 갖추었습니다. 예를 들어, OpenAI의 GPT-5는 간단한 질문엔 빠르게 답하고, '생각 모드'로 전환해 어려운 문제는 단계적으로 추론합니다. Google의 Gemini 역시 'Deep Think' 모드를 통해 답변 전 심층적인 자체 검토 과정을 거치는 기능을 선보였습니다. 이를 통해 복잡한 논리 및 수리 문제에서 정확도가 크게 향상되었습니다.</p>
+                        </div>
+                        <div id="trend2" class="tab-pane hidden">
+                            <h3 class="text-xl font-bold mb-2">멀티모달 및 장문 처리</h3>
+                            <p class="text-slate-700">텍스트뿐 아니라 이미지, 표, 코드 등 다양한 형식을 이해하는 능력이 표준이 되었습니다. Meta의 Llama 4는 텍스트·이미지·비디오까지 동시에 이해하는 네이티브 멀티모달 모델로 출시되었고, 최대 1천만 토큰에 달하는 방대한 문맥도 처리할 수 있어 초장문의 문서 요약이 가능합니다. GPT-5 역시 컨텍스트 한도가 비약적으로 늘어났습니다. 이는 AI가 더 복합적인 정보를 다룰 수 있게 되었음을 의미합니다.</p>
+                        </div>
+                        <div id="trend3" class="tab-pane hidden">
+                            <h3 class="text-xl font-bold mb-2">코딩 능력 대폭 강화</h3>
+                            <p class="text-slate-700">2025년 LLM들은 소프트웨어 개발 분야에서 뛰어난 성과를 보입니다. OpenAI는 GPT-5 기반 코딩 특화 모델 'GPT-5-Codex'를 선보여, 7시간 이상 자율적으로 코드를 작성·디버깅하는 능력을 시연했습니다. Anthropic의 Claude 4 (Opus)는 실제 소프트웨어 개발 과제를 풀어내는 SWE-벤치마크에서 최고 성적(72.5%)을 기록하며 현존 최고의 코딩 AI로 평가받았습니다. 이제 LLM은 단순 코드 생성을 넘어, 복잡한 개발 프로젝트를 보조하는 수준에 이르렀습니다.</p>
+                        </div>
+                        <div id="trend4" class="tab-pane hidden">
+                            <h3 class="text-xl font-bold mb-2">AI 안전성과 정책 강화</h3>
+                            <p class="text-slate-700">AI의 영향력이 커지면서 각 기업은 모델의 안전장치와 정책 준수에 집중하고 있습니다. Anthropic은 “헌법 기반 AI” 접근으로 명확한 안전 원칙을 준수하는 Claude 시리즈를 발전시켰고, GPT-5는 사실 오류와 부적절 콘텐츠 생성을 크게 줄였습니다. Google의 Gemini는 답변이 위험하거나 부적절할 경우 단호히 거부하는 경향이 있어 안전성이 높다는 평가를 받습니다. 이는 AI 기술의 책임감 있는 발전을 위한 필수적인 요소입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="comparison" class="py-16 sm:py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">LLM별 상세 비교</h2>
+                    <p class="mt-4 text-lg text-slate-600">주요 LLM들의 특징과 성능을 비교 분석합니다. 아래 로고를 클릭하여 상세 정보를 확인하세요.</p>
+                </div>
+
+                <div class="mt-12">
+                    <div class="flex justify-center items-center flex-wrap gap-4 mb-8">
+                         <img data-model="openai" src="https://placehold.co/120x50/FFFFFF/000000?text=OpenAI" alt="OpenAI" class="h-12 border-2 border-transparent p-2 rounded-lg model-logo selected">
+                         <img data-model="google" src="https://placehold.co/120x50/FFFFFF/000000?text=Google" alt="Google" class="h-12 border-2 border-transparent p-2 rounded-lg model-logo">
+                         <img data-model="anthropic" src="https://placehold.co/120x50/FFFFFF/000000?text=Anthropic" alt="Anthropic" class="h-12 border-2 border-transparent p-2 rounded-lg model-logo">
+                         <img data-model="meta" src="https://placehold.co/120x50/FFFFFF/000000?text=Meta" alt="Meta" class="h-12 border-2 border-transparent p-2 rounded-lg model-logo">
+                         <img data-model="xai" src="https://placehold.co/120x50/FFFFFF/000000?text=xAI" alt="xAI" class="h-12 border-2 border-transparent p-2 rounded-lg model-logo">
+                    </div>
+                    <div id="model-details-content" class="bg-white p-8 rounded-xl shadow-lg transition-all duration-300">
+                    </div>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center">주요 기능 비교 (Radar Chart)</h3>
+                        <p class="text-slate-600 mb-6 text-center">각 모델의 상대적 강점을 한눈에 비교해 보세요. 아래 체크박스를 통해 보고 싶은 모델을 선택할 수 있습니다.</p>
+                        <div class="chart-container">
+                            <canvas id="llmRadarChart"></canvas>
+                        </div>
+                        <div id="radar-chart-legend" class="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center">소프트웨어 개발 성능 (SWE-bench)</h3>
+                         <p class="text-slate-600 mb-6 text-center">실제 소프트웨어 개발 과제 해결 능력을 평가하는 SWE-bench 점수 비교입니다. Anthropic의 Claude 4 Opus가 가장 높은 성능을 보여줍니다.</p>
+                        <div class="chart-container">
+                            <canvas id="codingBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16 sm:py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">업무 환경에 미치는 영향</h2>
+                    <p class="mt-4 text-lg text-slate-600">LLM 기술 발전이 가져올 업무 방식의 변화와 고려사항을 알아봅니다.</p>
+                </div>
+
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4">업무 방식의 변화</h3>
+                        <ul class="space-y-3 text-slate-700">
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span><strong>문서 작성 및 요약:</strong> 보고서, 기획안 초안을 AI가 작성하고, 사람은 검토 및 수정에 집중하여 시간을 절약합니다.</span></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span><strong>커뮤니케이션:</strong> 비즈니스 이메일, 제안서 등을 LLM이 생성하거나 다듬어 품질과 속도를 향상시킵니다.</span></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span><strong>코딩 및 데이터 분석:</strong> 비개발자도 간단한 자동화 스크립트나 SQL 쿼리를 LLM의 도움으로 작성할 수 있게 됩니다.</span></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2">✓</span><span><strong>회의 및 자료 정리:</strong> 회의 녹취록 요약, 여러 자료에서 정보 추출 등 정보 정리 업무를 자동화합니다.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4">활용상 고려 사항</h3>
+                        <ul class="space-y-3 text-slate-700">
+                            <li class="flex items-start"><span class="text-orange-500 mr-2">⚠️</span><span><strong>보안 정책:</strong> 생성된 내용의 정확성은 반드시 사용자가 검증해야 하며, 민감한 사내 정보는 LLM에 입력하지 않아야 합니다.</span></li>
+                            <li class="flex items-start"><span class="text-orange-500 mr-2">⚠️</span><span><strong>AI 리터러시:</strong> AI 결과물을 비판적으로 검토하고 편향이나 오류를 살피는 능력이 요구됩니다. 최종 책임은 사람에게 있습니다.</span></li>
+                             <li class="flex items-start"><span class="text-orange-500 mr-2">⚠️</span><span><strong>기업 가이드라인:</strong> AI 활용을 장려하면서도 윤리·보안을 준수하도록 사내 가이드라인 마련 및 교육이 필요합니다.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-center mb-6">Discussion Questions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                            <p class="font-semibold text-blue-600 mb-2">Question 1</p>
+                            <p>우리 조직의 업무 중 어떤 부분에 LLM 도입 효과가 가장 클까요? 구체적인 활용 방안을 토의해보세요.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                            <p class="font-semibold text-blue-600 mb-2">Question 2</p>
+                            <p>AI의 제안에 대해 최종 의사결정권자가 가져야 할 검토 절차는 무엇일까요? AI 결과물을 어떻게 신뢰하고 검증할지 논의해보세요.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                            <p class="font-semibold text-blue-600 mb-2">Question 3</p>
+                            <p>LLM 활용이 확산될수록 요구되는 직원들의 새로운 역량이나 역할 변화는 무엇일지 생각해보세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-slate-800 text-white">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2025 LLM Trend Analysis Report. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const modelData = {
+                openai: {
+                    name: "OpenAI - GPT-5",
+                    description: "GPT-4 대비 종합 지능이 크게 향상된 모델로, 글쓰기, 코딩, 수학 등 다방면에서 최고 수준의 성능을 보여줍니다. '듀얼 모델 + 라우터' 구조를 통해 간단한 질문에는 신속하게, 복잡한 문제에는 'Thinking 모드'로 더 오래 생각하여 답변합니다. 개발자용으로 특화된 GPT-5-Codex는 에이전트형 코딩 능력이 강화되어 대규모 프로젝트도 자율적으로 수행할 수 있습니다.",
+                    pros: ["대부분 분야에서 높은 정확도", "향상된 추론 및 문맥 이해 능력", "긴 입력 처리 및 멀티모달 지원"],
+                    cons: ["상위 버전 유료 구독 필요", "심층 응답 시 속도 저하", "높은 연산 자원 사용"]
+                },
+                google: {
+                    name: "Google - Gemini 2.5",
+                    description: "답변 전에 자체적인 사고 과정을 거치는 '생각하는 모델'을 표방합니다. 사용자가 조절 가능한 'Deep Think' 모드를 통해 복잡한 문제의 정확도를 크게 향상시켰습니다. Google 계정 및 Workspace 서비스와의 긴밀한 연동이 최대 장점이며, Flash(경량), Pro(고급), Ultra(기업용) 등 계층화된 서비스로 다양한 사용자 요구에 대응합니다.",
+                    pros: ["Google 서비스와 완벽한 통합", "우수한 멀티모달 처리 능력", "높은 정확성과 신뢰도"],
+                    cons: ["다소 보수적인 답변 성향", "민감 주제에 대한 답변 거부 경향", "창의적 글쓰기에서 기계적 느낌"]
+                },
+                anthropic: {
+                    name: "Anthropic - Claude 4",
+                    description: "안전성과 신뢰성에 중점을 둔 고성능 LLM입니다. 최고 사양인 Opus 4는 SWE-bench에서 1위를 차지하며 '세계 최고의 코딩 모델'로 평가받습니다. 'AI 헌법'이라는 명확한 안전 원칙을 준수하여 윤리적이고 투명한 답변을 생성하며, 도구 사용 및 장기 기억 기능이 강화되어 복잡하고 긴 작업을 안정적으로 수행합니다.",
+                    pros: ["세계 최고 수준의 코딩 능력 (Opus)", "명확한 윤리 원칙 기반의 높은 안전성", "긴 작업의 맥락 유지 능력 우수"],
+                    cons: ["주로 텍스트 기반", "기업용 API 위주로 접근성 제한적", "범용성 면에서는 GPT에 비해 다소 부족"]
+                },
+                meta: {
+                    name: "Meta - Llama 4",
+                    description: "오픈소스 LLM의 새로운 지평을 연 모델 패밀리입니다. Mixture-of-Experts(MoE) 구조를 도입하여 효율과 성능을 극대화했으며, 태생부터 텍스트-이미지-비디오를 통합 처리하는 멀티모달로 설계되었습니다. 특히 최대 1천만 토큰이라는 방대한 컨텍스트 창을 제공하며, 커뮤니티 라이선스를 통해 조건부 무료로 사용할 수 있어 개방형 AI 생태계의 핵심으로 부상했습니다.",
+                    pros: ["오픈소스로 높은 접근성", "텍스트, 이미지, 비디오 통합 멀티모달", "거대한 컨텍스트 창(최대 1천만 토큰)"],
+                    cons: ["최고 성능은 상용 모델 대비 다소 낮음", "안전장치는 사용자가 직접 구현해야 함", "활용을 위한 기술적 전문성 요구"]
+                },
+                 xai: {
+                    name: "xAI - Grok 4",
+                    description: "일론 머스크가 이끄는 xAI의 모델로, '재미있고 날것 그대로의 AI'를 표방합니다. 약간 도발적이고 위트 있는 응답이 특징이며, 실시간 웹 검색 기능이 통합되어 최신 정보에 기반한 답변을 제시합니다. 2백만 토큰의 대용량 컨텍스트를 지원하며 ARC-AGI 벤치마크에서 높은 점수를 기록했습니다. 개성있는 AI라는 점에서 차별화되지만, 때로 논란을 부르는 답변을 하기도 합니다.",
+                    pros: ["최신 정보를 반영하는 실시간 웹 검색", "위트 있고 개성 있는 답변 스타일", "검열이 적어 자유로운 대화 가능"],
+                    cons: ["응답이 논란을 일으킬 수 있음", "기업 환경보다 개인 취미용에 적합", "X 프리미엄+ 구독자 등 제한적 제공"]
+                }
+            };
+
+            const llmStats = {
+                labels: ['추론 능력', '코딩 지원', '멀티모달', '안전성', '접근성'],
+                datasets: [
+                    { label: 'GPT-5', data: [4.5, 5, 4, 4, 4], backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgb(255, 99, 132)', pointBackgroundColor: 'rgb(255, 99, 132)' },
+                    { label: 'Gemini 2.5', data: [4.5, 4, 5, 4, 5], backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgb(54, 162, 235)', pointBackgroundColor: 'rgb(54, 162, 235)' },
+                    { label: 'Claude 4', data: [3, 4.5, 3, 5, 3], backgroundColor: 'rgba(255, 206, 86, 0.2)', borderColor: 'rgb(255, 206, 86)', pointBackgroundColor: 'rgb(255, 206, 86)' },
+                    { label: 'Llama 4', data: [3, 3, 5, 3, 4.5], backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgb(75, 192, 192)', pointBackgroundColor: 'rgb(75, 192, 192)' },
+                    { label: 'Grok 4', data: [3, 3, 3, 2, 3], backgroundColor: 'rgba(153, 102, 255, 0.2)', borderColor: 'rgb(153, 102, 255)', pointBackgroundColor: 'rgb(153, 102, 255)' }
+                ]
+            };
+
+            const codingData = {
+                labels: ['Claude 4 (Opus)', 'GPT-5-Codex', 'DeepSeek-R1', 'Gemini 2.5 Pro'],
+                datasets: [{
+                    label: 'SWE-bench Verified 점수 (%)',
+                    data: [72.5, 68.0, 49.2, 65.0],
+                    backgroundColor: ['#c4b5fd', '#a5b4fc', '#7dd3fc', '#60a5fa'],
+                    borderColor: ['#a78bfa', '#818cf8', '#38bdf8', '#3b82f6'],
+                    borderWidth: 1
+                }]
+            };
+
+            const renderModelDetails = (modelKey) => {
+                const data = modelData[modelKey];
+                const contentEl = document.getElementById('model-details-content');
+                contentEl.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-2">${data.name}</h3>
+                    <p class="text-slate-600 mb-6">${data.description}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2 text-green-600">✅ 장점</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                ${data.pros.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2 text-red-600">⚠️ 단점</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                                ${data.cons.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            };
+
+            const modelLogos = document.querySelectorAll('.model-logo');
+            modelLogos.forEach(logo => {
+                logo.addEventListener('click', (e) => {
+                    modelLogos.forEach(l => l.classList.remove('selected'));
+                    e.currentTarget.classList.add('selected');
+                    renderModelDetails(e.currentTarget.dataset.model);
+                });
+            });
+            renderModelDetails('openai');
+
+            const radarCtx = document.getElementById('llmRadarChart').getContext('2d');
+            const radarChart = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: llmStats.labels,
+                    datasets: [] 
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e5e7eb' },
+                            grid: { color: '#e5e7eb' },
+                            pointLabels: { font: { size: 12 }, color: '#374151' },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            ticks: {
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            const legendContainer = document.getElementById('radar-chart-legend');
+            llmStats.datasets.forEach((dataset, index) => {
+                const div = document.createElement('div');
+                div.classList.add('flex', 'items-center');
+                div.innerHTML = `
+                    <input type="checkbox" id="model-${index}" data-index="${index}" class="h-4 w-4 rounded mr-2" checked style="accent-color: ${dataset.borderColor};">
+                    <label for="model-${index}" class="text-sm cursor-pointer">${dataset.label}</label>
+                `;
+                legendContainer.appendChild(div);
+            });
+            
+            const updateRadarChart = () => {
+                const visibleDatasets = [];
+                legendContainer.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        visibleDatasets.push(llmStats.datasets[checkbox.dataset.index]);
+                    }
+                });
+                radarChart.data.datasets = visibleDatasets;
+                radarChart.update();
+            };
+
+            legendContainer.addEventListener('change', updateRadarChart);
+            updateRadarChart();
+
+            const barCtx = document.getElementById('codingBarChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: codingData,
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { beginAtZero: true, max: 80, grid: { color: '#e5e7eb' } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.replace('active-tab', 'inactive-tab'));
+                    button.classList.replace('inactive-tab', 'active-tab');
+                    
+                    const targetTab = button.dataset.tab;
+                    tabPanes.forEach(pane => {
+                        if (pane.id === targetTab) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.replace('active-nav', 'inactive-nav');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.replace('inactive-nav', 'active-nav');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+
